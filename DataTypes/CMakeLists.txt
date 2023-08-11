@@ -30,6 +30,7 @@ set(DATATYPES_SRC
     Algorithm/DataTypeAlgorithm.cpp
     Algorithm/DataTypeVisitor.cpp
     Algorithm/FindLeaves.cpp
+    Algorithm/FindDeps.cpp
     Algorithm/ContainsPointer.cpp
     Algorithm/GetValue.cpp
     Algorithm/LookupAddressAndTypeByName.cpp

@@ -36,6 +36,20 @@ namespace DataTypeAlgorithm {
         return visitor.getResult();
     }
 
+    FindDependencies::Result findDependencies(const DataType * node, void * starting_address) {
+        checkType(node, __FUNCTION__);
+
+        FindDependencies::FindDepsVisitor visitor(starting_address);
+        bool depFound = visitor.go(node);
+        
+        if (!depFound) {
+            FindDependencies::Result default_result({starting_address});
+            return default_result;
+        }
+        
+        return visitor.getResult();
+    }
+
 
     LookupAddressAndTypeByName::Result _lookupAddressAndTypeByName (const DataType * node, LookupAddressAndTypeByName::LookupAddressAndTypeByNameVisitor& visitor) {
         checkType(node, __FUNCTION__);

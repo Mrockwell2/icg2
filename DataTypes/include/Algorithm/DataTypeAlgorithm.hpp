@@ -1,6 +1,7 @@
 #pragma once
 
 #include "FindLeaves.hpp"
+#include "FindDeps.hpp"
 #include "ContainsPointer.hpp"
 #include "LookupAddressAndTypeByName.hpp"
 #include "LookupNameByAddressAndType.hpp"
@@ -29,6 +30,15 @@ namespace DataTypeAlgorithm {
      * @return FindLeaves::Result 
      */
     FindLeaves::Result findLeaves(const DataType * node, std::string starting_name, void * starting_address);
+
+    /**
+     * @brief Find the addresses of all the dependencies this allocation has
+     * 
+     * @param node DataType to search
+     * @param starting_address starting address of allocation that we're searching
+     * @return FindLeaves::Result 
+     */
+    FindDependencies::Result findDependencies(const DataType * node, void * starting_address);
 
 
     /**

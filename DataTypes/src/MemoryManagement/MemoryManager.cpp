@@ -5,6 +5,8 @@
 #include "MemoryManagement/MemoryManager.hpp"
 #include "MemoryManagement/AllocInfo.hpp"
 
+#include "Algorithm/DataTypeAlgorithm.hpp"
+
 #include "Utils/MutableDeclaration.hpp"
 
 #include "CheckpointAgent/J_CheckpointAgent.hpp"
@@ -162,6 +164,44 @@ void MemoryManager::write_checkpoint( std::ostream& out_s) {
     std::vector<AllocInfo*> allocInfoList;
 
     pthread_mutex_lock(&allocInfoMapMutex);
+
+    for ( auto pos = allocInfoByAddressMap.begin() ; pos != allocInfoByAddressMap.end() ; pos++ ) {
+        allocInfo = pos->second;
+        allocInfoList.push_back(allocInfo);
+    }
+    do_write_checkpoint( out_s, allocInfoList);
+
+    pthread_mutex_unlock(&allocInfoMapMutex);
+}
+
+// MEMBER FUNCTION
+void MemoryManager::write_checkpoint( const std::string& filename, const std::string& var_name) {
+
+    std::ofstream out_s( filename.c_str(), std::ios::out);
+    if (out_s.is_open()) {
+        write_checkpoint( out_s, var_name );
+    } else {
+        std::cerr << "ERROR: Couldn't open \""<< filename <<"\"." << std::endl;
+        std::cerr.flush();
+    }
+}
+
+// MEMBER FUNCTION
+void MemoryManager::write_checkpoint( std::ostream& out_s, const std::string& var_name) {
+
+    AllocInfo* allocInfo;
+    std::vector<AllocInfo*> allocInfoList;
+
+    pthread_mutex_lock(&allocInfoMapMutex);
+
+	allocInfo = getAllocInfoNamed(var_name);
+	if(allocInfo) {
+		FindDependencies::Result result = DataTypeAlgorithm::findDependencies(allocInfo->getDataType(), allocInfo->getStart());
+
+	} else {
+		std::cerr << "ERROR: Couldn't find \"" << var_name << "\" allocated." << std::endl;
+		std::cerr.flush();
+	}
 
     for ( auto pos = allocInfoByAddressMap.begin() ; pos != allocInfoByAddressMap.end() ; pos++ ) {
         allocInfo = pos->second;

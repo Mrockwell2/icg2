@@ -103,7 +103,7 @@ class MemoryManager {
      * @param out_s stream to write to
 	 * @param var_name name of the variable to be partially checkpointing
      */
-    void write_checkpoint( std::ostream& out_s, const std::string& var_name);
+    void write_partial_checkpoint( std::ostream& out_s, const std::string& var_name);
 
     /**
      * @brief Open a file and then write a checkpoint to it
@@ -111,7 +111,7 @@ class MemoryManager {
      * @param filename name of file to write to
 	 * @param var_name name of the variable to be partially checkpointing
      */
-    void write_checkpoint( const std::string& filename, const std::string& var_name);
+    void write_partial_checkpoint( const std::string& filename, const std::string& var_name);
 
     /**
      * @brief Restore a checkpoint from file with given name

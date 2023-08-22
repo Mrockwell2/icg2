@@ -1,0 +1,12 @@
+// Variable Declarations.
+double *dub_ptr ;
+double dub ;
+
+
+// Clear all allocations to 0.
+clear_all_vars();
+
+
+// Variable Assignments.
+dub_ptr = &dub ;
+dub = 5 ;

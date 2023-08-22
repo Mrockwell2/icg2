@@ -35,6 +35,7 @@ macro(add_icg_integration_test DIRNAME HEADERNAME)
 endmacro()
 
 add_icg_integration_test(basic_checkpoint_restore header.hpp)
+add_icg_integration_test(partial_checkpoint header.hpp)
 add_icg_integration_test(namespaces bar.hpp)
 add_icg_integration_test(nested_classes bar.hpp)
 

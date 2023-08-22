@@ -63,6 +63,7 @@ namespace FindDependencies {
     }
 
     bool FindDepsVisitor::visitPointerType(const PointerDataType * node) {
+		deps.emplace_back(address_stack.top());
 		Value * val = DataTypeAlgorithm::getValue(node, address_stack.top());
     	PointerValue * pointer_val = dynamic_cast<PointerValue *> (val);
 		void * ptr = pointer_val->getPointer();

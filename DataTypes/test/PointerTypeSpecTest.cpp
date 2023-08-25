@@ -22,61 +22,7 @@ class PointerDataTypeTest : public ::testing::Test {
 */
 
 
-TEST_F( PointerDataTypeTest, copy_constructor ) {
 
-    // Create a PointerDataType.
-    PointerDataType* orig = new PointerDataType("float**");
-
-    // Duplicate it.
-    PointerDataType* copy = new PointerDataType( *(const PointerDataType*)orig );
-
-    // Verify that the duplicate PointerDataType is what we expect.
-    std::stringstream ss;
-    ss << copy->toString();
-    int result = ss.str().compare("float***");
-    EXPECT_EQ(0, result);
-
-    // Clean up.
-    delete copy;
-    delete orig;
-}
-
-TEST_F( PointerDataTypeTest , operator_equal ) {
-
-    // Create a PointerDataType.
-    PointerDataType* orig = new PointerDataType( "long*");
-
-    // Assign it to another PointerDataType.
-    PointerDataType copy = *(const PointerDataType*)orig;
-
-    // Verify that the assigned PointerDataType is what we expect.
-    std::stringstream ss;
-    ss << copy.toString();
-    int result = ss.str().compare("long**");
-    EXPECT_EQ(0, result);
-
-    // Clean up.
-    delete orig;
-}
-
-TEST_F( PointerDataTypeTest , clone ) {
-
-    // Create a PointerDataType.
-    PointerDataType* orig = new PointerDataType( "int*");
-
-    // Clone it.
-    DataType * copy = orig->clone();
-
-    // Verify that the cloned PointerDataType is what we expect.
-    std::stringstream ss;
-    ss << copy->toString();
-    int result = ss.str().compare("int**");
-    EXPECT_EQ(0, result);
-
-    // Clean up.
-    delete orig;
-    delete copy;
-}
 
 TEST_F( PointerDataTypeTest , getSize ) {
 
@@ -87,36 +33,6 @@ TEST_F( PointerDataTypeTest , getSize ) {
     EXPECT_EQ( sizeof(void*), ptrTypeSpec->getSize());
 }
 
-// TEST_F( PointerDataTypeTest , assignValue ) {
-
-//     double d = 1.2345;
-//     double * d_ptr;
-
-//     // Create a PointerDataType.
-//     PointerDataType* ptrTypeSpec = new PointerDataType( "double");
-
-//     PointerValue * ptrValue = new PointerValue(&d);
-//     ptrTypeSpec->assignValue(&d_ptr, ptrValue);
-
-//     EXPECT_EQ(1.2345, *d_ptr);
-// }
-
-// TEST_F( PointerDataTypeTest , getValue ) {
-
-//     // ARRANGE
-//     double * d_ptr = (double*)0x12345678;
-
-//     // Create a PointerDataType.
-//     PointerDataType* ptrTypeSpec = new PointerDataType( "double");
-
-//     // ACT
-//     Value * value = ptrTypeSpec->getValue(&d_ptr);
-
-//     // ASSERT
-//     PointerValue * ptrValue = dynamic_cast<PointerValue *> (value);
-//     ASSERT_TRUE(ptrValue != NULL);
-//     ASSERT_EQ((double*)0x12345678, ptrValue->getPointer());
-// }
 
 TEST_F( PointerDataTypeTest , validate_1 ) {
 
@@ -164,7 +80,7 @@ TEST_F( PointerDataTypeTest , getDereferencedType_1 ) {
     ASSERT_EQ(true, validation_result);
 
     // Dereference the type.
-    const DataType * dereferencedPtrTypeSpec;
+    std::shared_ptr<const DataType> dereferencedPtrTypeSpec;
     bool  dereference_result = true;
     try {
         dereferencedPtrTypeSpec = ptrTypeSpec->getSubType();
@@ -201,7 +117,7 @@ TEST_F( PointerDataTypeTest , getDereferencedType_2 ) {
     ASSERT_EQ(true, validation_result);
 
     // Dereference the type.
-    const DataType * dereferencedPtrTypeSpec;
+    std::shared_ptr<const DataType> dereferencedPtrTypeSpec;
     bool  dereference_result = true;
     try {
         dereferencedPtrTypeSpec = ptrTypeSpec->getSubType();

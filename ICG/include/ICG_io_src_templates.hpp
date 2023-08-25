@@ -9,8 +9,7 @@ std::string io_src = std::string(R"(
 #include <iostream>
 #include "DataTypeInator.hpp"
 #include "Type/EnumDictionary.hpp"
-#include "Type/CompositeDataType.hpp"
-#include "Type/EnumDataType.hpp"
+#include "Type/AllTypes.hpp"
 
 #include "{{filename}}"
 
@@ -30,39 +29,39 @@ void destruct (void* address) {
     temp->~T();
 }
 
-{{list_class_decl}}
+{{list_classes_class_decl}}
 
 void populate_type_dictionary(DataTypeInator * dataTypeInator) {
-    {{list_call_class_decl}}
+    {{list_classes_call_class_decl}}
+
+    {{list_stls_stl_decl}}
 
     dataTypeInator->validateDictionary();
 }
 )");
 
-std::string call_class_decl = std::string(R"(
+std::string call_class_decl = std::string(R"( 
     add{{ClassName_mangled}}toDictionary(dataTypeInator);
 )");
 
 std::string class_decl = std::string(R"(
-bool add{{ClassName_mangled}}toDictionary(DataTypeInator* dataTypeInator) {
+void add{{ClassName_mangled}}toDictionary(DataTypeInator* dataTypeInator) {
 
-    bool result = false;
-    try {
-        CompositeDataType* {{ClassName_mangled}}TypeSpec =
-            new CompositeDataType("{{ClassName}}", sizeof({{ClassName}}), &construct<{{ClassName}}>, &destruct<{{ClassName}}> );
-            {{list_field_decl}}
+    CompositeDataType* {{ClassName_mangled}}TypeSpec = new CompositeDataType("{{ClassName}}", sizeof({{ClassName}}), &construct<{{ClassName}}>, &destruct<{{ClassName}}> );
+    using type_to_add = {{ClassName}};
 
-        dataTypeInator->addToDictionary("{{ClassName}}", {{ClassName_mangled}}TypeSpec);
-    } catch( const std::logic_error& e ) {
-        std::cerr << e.what();
-        result = false;
-    }
-    return result;
+        {{list_fields_field_decl}}
+
+    dataTypeInator->addToDictionary("{{ClassName}}", {{ClassName_mangled}}TypeSpec);
 }
 )");
 
 std::string field_decl = std::string(R"(
-    {{ClassName_mangled}}TypeSpec->addRegularMember( "{{FieldName}}", offsetof({{ClassName}}, {{FieldName}}), "{{FieldType}}");
+    {{ClassName_mangled}}TypeSpec->addRegularMember( "{{FieldName}}", offsetof(type_to_add, {{FieldName}}), "{{FieldType}}");
+)");
+
+std::string stl_decl = std::string(R"( 
+    dataTypeInator->addToDictionary("{{STLName}}", new SpecifiedSequenceDataType<{{STLName}}>("{{STLName}}"));
 )");
 
 std::map<std::string, std::string> template_dictionary {
@@ -70,4 +69,5 @@ std::map<std::string, std::string> template_dictionary {
     {"call_class_decl", call_class_decl},
     {"class_decl", class_decl},
     {"field_decl", field_decl},
+    {"stl_decl", stl_decl}
 };

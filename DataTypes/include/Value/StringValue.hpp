@@ -20,14 +20,23 @@ class StringValue : public Value {
     /**
      Print this StringValue to a stream.
      */
-    void print(std::ostream &s);
+    void print(std::ostream &s) const override;
 
     /**
      Get a string representation of this StringValue.
      */
-    std::string toString();
-    std::string getRawString();
-    std::string getEscapedString();
+    std::string toString() const override;
+
+    /**
+     * @brief Get the Value Type object
+     * 
+     * @return ValueType 
+     */
+    inline ValueType getValueType() const override { return ValueType::STRING; }
+
+
+    std::string getRawString() const;
+    std::string getEscapedString() const;
 
     private:
 

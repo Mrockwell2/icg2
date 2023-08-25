@@ -2,6 +2,7 @@
 *.a
 .vscode
 *.xml
+*.json
 io_src_main
 io_src.hpp
 clang-parse

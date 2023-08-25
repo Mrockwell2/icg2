@@ -1,5 +1,7 @@
 #include "Type/EnumDictionary.hpp"
 #include "Type/SpecifiedPrimitiveDataType.hpp"
+#include "Type/SpecifiedSequenceDataType.hpp"
+
 #include "Algorithm/FindLeaves.hpp"
 
 #include "DataTypeTestSupport.hpp"
@@ -44,12 +46,12 @@ namespace FindLeaves {
 
 TEST_F(FindLeavesTest, basic) {
     // ARRANGE
-    SpecifiedPrimitiveDataType<int> int_data_type;
+    std::shared_ptr<DataType> int_data_type (new IntDataType);
     int var_to_checkpoint = 100;
 
     // ACT
     FindLeavesVisitor visitor("var_to_checkpoint", &var_to_checkpoint);
-    visitor.go(&int_data_type);
+    visitor.go(int_data_type);
 
     // ASSERT
     auto results = visitor.getResult();
@@ -59,7 +61,7 @@ TEST_F(FindLeavesTest, basic) {
 
 TEST_F(FindLeavesTest, array) {
     // ARRANGE
-    const DataType * data_type = dataTypeInator.resolve("int[5]");
+    std::shared_ptr<const DataType> data_type = dataTypeInator.resolve("int[5]");
     int var_to_checkpoint[5] = {1, 2, 3, 4, 5};
 
     // ACT
@@ -75,10 +77,34 @@ TEST_F(FindLeavesTest, array) {
     }
 }
 
+TEST_F(FindLeavesTest, vector) {
+    // ARRANGE
+    std::vector<int> var_to_checkpoint = {1, 2, 3, 4, 5};
+    std::shared_ptr<DataType> data_type (new SpecifiedSequenceDataType<std::vector<int>>("std::vector<int>"));
+    data_type->validate(&dataTypeInator);
+
+    // ACT
+    FindLeavesVisitor visitor("var_to_checkpoint", &var_to_checkpoint);
+    visitor.go(data_type);
+
+    // ASSERT
+    auto results = visitor.getResult();
+    ASSERT_EQ(results.size(), 6);
+    
+    EXPECT_EQ(true, results[0].is_stl);
+    EXPECT_EQ(var_to_checkpoint.size(), results[0].stl_size);
+    EXPECT_EQ(std::string("var_to_checkpoint.size"), results[0].name_stack.toString());
+
+    for (int i = 1; i < results.size(); i++) {
+        std::string var_name = "var_to_checkpoint[" + std::to_string(i-1) + "]";
+        verifyIntValue(results[i], var_name, var_to_checkpoint[i-1]);
+    }
+}
+
 TEST_F(FindLeavesTest, composite1) {
     // ARRANGE
     addClassOneToTypeDictionary(&dataTypeInator);
-    const DataType * data_type = dataTypeInator.resolve("ClassOne");
+    std::shared_ptr<const DataType> data_type = dataTypeInator.resolve("ClassOne");
     ClassOne var_to_checkpoint = {.a = 5, .b = 1.5};
 
     // ACT
@@ -97,7 +123,7 @@ TEST_F(FindLeavesTest, composite2) {
     addClassOneToTypeDictionary(&dataTypeInator);
     addClassTwoToTypeDictionary(&dataTypeInator);
 
-    const DataType * data_type = dataTypeInator.resolve("ClassTwo");
+    std::shared_ptr<const DataType> data_type = dataTypeInator.resolve("ClassTwo");
     ClassTwo var_to_checkpoint = {.x = 100, .y = 5.5, .c1 = {.a = 5, .b = 1.5}};
 
     // ACT
@@ -116,7 +142,7 @@ TEST_F(FindLeavesTest, composite2) {
 TEST_F(FindLeavesTest, composite3) {
     // ARRANGE
     addClassThreeToTypeDictionary(&dataTypeInator);
-    const DataType * data_type = dataTypeInator.resolve("ClassThree");
+    std::shared_ptr<const DataType> data_type = dataTypeInator.resolve("ClassThree");
 
     ClassThree var_to_checkpoint = {.pos = {5.5, 6.6}, .vel = {7.7, 8.8}};
 
@@ -137,7 +163,7 @@ TEST_F(FindLeavesTest, composite3) {
 TEST_F(FindLeavesTest, write_checkpoint_strings) {
     // ARRANGE
     addClassSixToTypeDictionary(&dataTypeInator);
-    const DataType * data_type = dataTypeInator.resolve("ClassSix");
+    std::shared_ptr<const DataType> data_type = dataTypeInator.resolve("ClassSix");
 
     const char * str_to_test_with =  "A string literal that we probably can't actually checkpoint";
 
@@ -166,7 +192,7 @@ TEST_F(FindLeavesTest, write_checkpoint_strings) {
     EXPECT_EQ("var_to_checkpoint.str", leaf.name_stack.toString());
     StringValue * str_val = dynamic_cast <StringValue *> (leaf.value);
     ASSERT_TRUE(str_val != NULL);
-    ASSERT_EQ ("\"Hello world :)\"", str_val->toString());    
+    ASSERT_EQ ("Hello world :)", str_val->toString());    
 
 }
 }

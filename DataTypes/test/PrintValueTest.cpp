@@ -1,8 +1,7 @@
 #include "Type/EnumDictionary.hpp"
-#include "Type/SpecifiedPrimitiveDataType.hpp"
 #include "Type/NormalStructMember.hpp"
 #include "DataTypeTestSupport.hpp"
-#include "Type/Types.hpp"
+#include "Type/AllTypes.hpp"
 
 #include "gtest/gtest.h"
 
@@ -29,7 +28,7 @@ namespace PrintValue {
 
 TEST_F(PrintValueTest, integer) {
     // ARRANGE
-    const DataType * type = new IntDataType;
+    std::shared_ptr<const DataType> type(new IntDataType);
     int val_to_print = 42;
     std::stringstream ss;
 
@@ -41,13 +40,12 @@ TEST_F(PrintValueTest, integer) {
     ASSERT_EQ(expected, ss.str());
 
 
-    // cleanup
-    delete type;
+
 }
 
 TEST_F(PrintValueTest, floating_point) {
     // ARRANGE
-    const DataType * type = new DoubleDataType;
+    std::shared_ptr<const DataType> type(new DoubleDataType);
     double val_to_print = -42.42;
     std::stringstream ss;
 
@@ -58,14 +56,13 @@ TEST_F(PrintValueTest, floating_point) {
     std::string expected = "-42.42";
     ASSERT_EQ(expected, ss.str());
 
-    // cleanup
-    delete type;
+
 }
 
 
 TEST_F( PrintValueTest , pointer ) {
     // ARRANGE
-    const DataType * type = dataTypeInator.resolve("double*");
+    std::shared_ptr<const DataType> type = dataTypeInator.resolve("double*");
     double * val_to_print = (double*)0xDEADBEEF;
     std::stringstream ss;
 
@@ -76,8 +73,7 @@ TEST_F( PrintValueTest , pointer ) {
     std::string expected = "0xdeadbeef";
     ASSERT_EQ(expected, ss.str());
 
-    // cleanup
-    delete type;
+
 }
 
 TEST_F( PrintValueTest, array ) {
@@ -86,32 +82,31 @@ TEST_F( PrintValueTest, array ) {
     double val_to_print[2][3][4] = {{{1.2, 2.3, 3.4, 4.5}, {5.6, 6.7, 7.8, 8.9}, {9.0, 0.1, 1.2, 2.3}},
                                     {{3.4, 4.5, 5.6, 6.7}, {7.8, 8.9, 9.0, 0.1}, {1.2, 2.3, 3.4, 4.5}}};
 
-    const DataType * type = dataTypeInator.resolve("double[2][3][4]");
+    std::shared_ptr<const DataType> type = dataTypeInator.resolve("double[2][3][4]");
     std::stringstream ss;
 
     // ACT
     DataTypeAlgorithm::printValue(type, ss, &val_to_print);
 
     // ASSERT
-    std::string expected = "{{{1.2,2.3,3.4,4.5},"
-        "{5.6,6.7,7.8,8.9},"
-        "{9,0.1,1.2,2.3}},"
-        "{{3.4,4.5,5.6,6.7},"
-        "{7.8,8.9,9,0.1},"
-        "{1.2,2.3,3.4,4.5}}}"
+    std::string expected = "[[[1.2, 2.3, 3.4, 4.5], "
+        "[5.6, 6.7, 7.8, 8.9], "
+        "[9, 0.1, 1.2, 2.3]], "
+        "[[3.4, 4.5, 5.6, 6.7], "
+        "[7.8, 8.9, 9, 0.1], "
+        "[1.2, 2.3, 3.4, 4.5]]]"
         ;
-    ASSERT_EQ(expected, ss.str());
+    ASSERT_EQ(expected,  ss.str());
 
 
-    // cleanup
-    delete type;
+
 }
 
 
 TEST_F(PrintValueTest, enumerated ) {
     // ARRANGE
     addDayOfWeekEnumToTypeDictionary(&dataTypeInator, &enumDictionary);
-    const DataType* type = dataTypeInator.resolve("DayOfWeek");
+    std::shared_ptr<const DataType> type = dataTypeInator.resolve("DayOfWeek");
     DayOfWeek val_to_print = Monday;
     std::stringstream ss;
 
@@ -123,8 +118,7 @@ TEST_F(PrintValueTest, enumerated ) {
     ASSERT_EQ(expected, ss.str());
 
 
-    // cleanup
-    delete type;
+
 }
 
 
@@ -134,7 +128,7 @@ TEST_F(PrintValueTest, composite) {
 
     addClassOneToTypeDictionary( &dataTypeInator );
     addClassTwoToTypeDictionary( &dataTypeInator );
-    const DataType* type = dataTypeInator.resolve("ClassTwo");
+    std::shared_ptr<const DataType> type = dataTypeInator.resolve("ClassTwo");
     std::stringstream ss;
 
     // ACT
@@ -144,14 +138,13 @@ TEST_F(PrintValueTest, composite) {
     std::string expected = "{100, 5.5, {5, 1.5}}";
     ASSERT_EQ(expected, ss.str());
 
-    // cleanup
-    delete type;
+
 }
 
 TEST_F(PrintValueTest, string) {
     // ARRANGE
     std::string val_to_print = "I was not able to light on any map or work giving the exact locality of the Castle Dracula, as there are no maps of this country as yet to compare with our own Ordnance Survey maps; but I found that Bistritz, the post town named by Count Dracula, is a fairly well-known place.";
-    const DataType* type = new StringDataType;
+    std::shared_ptr<const DataType> type(new StringDataType);
     std::stringstream ss;
 
     // ACT
@@ -161,8 +154,7 @@ TEST_F(PrintValueTest, string) {
     std::string expected = "\"" + val_to_print + "\"";
     ASSERT_EQ(expected, ss.str());
 
-    // cleanup
-    delete type;
+
 }
 
 TEST_F(PrintValueTest, string_class) {
@@ -171,7 +163,7 @@ TEST_F(PrintValueTest, string_class) {
     ClassSix val_to_print;
     val_to_print.str = "Dr. A Cula";
     val_to_print.char_ptr = (char *) 0xdeadbeef;
-    const DataType* type = dataTypeInator.resolve("ClassSix");
+    std::shared_ptr<const DataType> type = dataTypeInator.resolve("ClassSix");
     std::stringstream ss;
 
     // ACT
@@ -181,13 +173,12 @@ TEST_F(PrintValueTest, string_class) {
     std::string expected = "{0xdeadbeef, \"Dr. A Cula\"}";
     ASSERT_EQ(expected, ss.str());
 
-    // cleanup
-    delete type;
+
 }
 
 TEST_F(PrintValueTest, null_type) {
     // ARRANGE
-    const DataType* type = NULL;
+    std::shared_ptr<const DataType> type = NULL;
     int val_to_print = 5;
     std::stringstream ss;
 
@@ -206,7 +197,7 @@ TEST_F(PrintValueTest, null_type) {
 
 TEST_F(PrintValueTest, unvalidated_type) {
     // ARRANGE
-    const DataType* type = new ArrayDataType( std::string("no type with this name"), 100);
+    std::shared_ptr<const DataType> type(new ArrayDataType( std::string("no type with this name"), 100));
     int val_to_print = 5;
     std::stringstream ss;
 
@@ -221,6 +212,103 @@ TEST_F(PrintValueTest, unvalidated_type) {
         // Just assert that there is an error message
         ASSERT_TRUE(strlen(e.what()) > 0);
     }
+}
+
+TEST_F(PrintValueTest, vector) {
+    // ARRANGE
+    std::vector<int> val_to_print({1, 2, 3, 4, 5});
+
+    std::shared_ptr<DataType> type (new SpecifiedSequenceDataType<std::vector<int>>(  "std::vector<int>"));
+    type->validate(&dataTypeInator);
+
+    std::stringstream ss;
+
+    // ACT
+    DataTypeAlgorithm::printValue(type, ss, &val_to_print);
+
+    // ASSERT
+    std::string expected = "[1, 2, 3, 4, 5]";
+    ASSERT_EQ(expected, ss.str());
+
+
+}
+
+TEST_F(PrintValueTest, VectorOfClasses) {
+    // ARRANGE
+    std::vector<ClassTwo> val_to_print;
+
+    // ARRANGE
+    ClassTwo val1 = {.x = 100, .y = 5.5, .c1 = {.a = 5, .b = 1.5}};
+    ClassTwo val2 = {.x = 200, .y = 5.6, .c1 = {.a = 6, .b = 2.5}};
+    ClassTwo val3 = {.x = 300, .y = 5.7, .c1 = {.a = 7, .b = 3.5}};
+    val_to_print.push_back(val1);
+    val_to_print.push_back(val2);
+    val_to_print.push_back(val3);
+
+    addClassOneToTypeDictionary( &dataTypeInator );
+    addClassTwoToTypeDictionary( &dataTypeInator );
+    std::stringstream ss;
+
+    std::shared_ptr<DataType> vec_type (new SpecifiedSequenceDataType<std::vector<ClassTwo>>(  "std::vector<ClassTwo>"));
+
+    vec_type->validate(&dataTypeInator);
+
+
+    // ACT
+    DataTypeAlgorithm::printValue(vec_type, ss, &val_to_print);
+
+    // ASSERT
+    std::string expected = "[{100, 5.5, {5, 1.5}}, {200, 5.6, {6, 2.5}}, {300, 5.7, {7, 3.5}}]";
+    ASSERT_EQ(expected, ss.str());
+
+}
+
+class VecClass {
+    public:
+    std::vector<int> v;
+};
+
+void addVecClassToDataTypeInator(DataTypeInator& dataTypeInator) {
+
+    SequenceDataType * vecType = new SpecifiedSequenceDataType<std::vector<int>>("std::vector<int>");
+    vecType->validate(&dataTypeInator);
+    dataTypeInator.addToDictionary("std::vector<int>", vecType);
+
+    CompositeDataType * vecClassSpec =
+        new CompositeDataType( "VecClass", sizeof(VecClass), &construct<VecClass>, &destruct<VecClass>);
+        vecClassSpec->addRegularMember( "v", offsetof(VecClass, v), "std::vector<int>");
+
+    dataTypeInator.addToDictionary("VecClass", vecClassSpec);
+
+    vecClassSpec->validate(&dataTypeInator);
+}
+
+TEST_F(PrintValueTest, VectorOfClassWithVector) {
+    // ARRANGE
+    addVecClassToDataTypeInator(dataTypeInator);
+    
+    dataTypeInator.addToDictionary("std::vector<VecClass>", new SpecifiedSequenceDataType<std::vector<VecClass>>("std::vector<VecClass>"));
+    dataTypeInator.validateDictionary();
+
+    std::shared_ptr<const DataType> dict_type = dataTypeInator.resolve("std::vector<VecClass>");
+
+    std::vector<VecClass> val_to_print;
+    VecClass c1;
+    c1.v = {1, 2, 3};
+    VecClass c2;
+    c2.v = {4, 5, 6};
+
+    val_to_print.push_back(c1);
+    val_to_print.push_back(c2);
+
+    std::stringstream ss;
+
+    // ACT
+    DataTypeAlgorithm::printValue(dict_type, ss, &val_to_print);
+
+    // ASSERT
+    std::string expected = "[{[1, 2, 3]}, {[4, 5, 6]}]";
+    ASSERT_EQ(expected, ss.str());
 }
 
 }

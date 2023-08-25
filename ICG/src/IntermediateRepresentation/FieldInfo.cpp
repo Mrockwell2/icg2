@@ -6,7 +6,6 @@
 /************************************/
 
 FieldInfo::FieldInfo () {}
-FieldInfo::FieldInfo (std::string n, std::string t, AccessLevel a) : type(t), name(n), access_info(a) {}
 
 ICGTemplateEngine::Dictionary FieldInfo::toDictionary() const {
     ICGTemplateEngine::Dictionary dictionary;
@@ -19,12 +18,16 @@ ICGTemplateEngine::Dictionary FieldInfo::toDictionary() const {
 }
 
 // Nothing to recurse into
-std::vector<const ICGTemplateEngine::recursable *> FieldInfo::nextLevel() const {
-    std::vector<const ICGTemplateEngine::recursable *> empty_list;
+ICGTemplateEngine::ListTokenItems FieldInfo::nextLevel() const {
+    ICGTemplateEngine::ListTokenItems empty_list;
     return empty_list;
 }
 
-std::ostream& operator<< (std::ostream& stream, const FieldInfo& field) {
-    stream << field.name << "\n\t" << field.type << "\n\t" <<  field.access_info << std::endl;
-    return stream;
+std::string FieldInfo::toString() const {
+    return name + ": " + type;
 }
+
+// std::ostream& operator<< (std::ostream& stream, const FieldInfo& field) {
+//     stream << field.name << "\n\t" << field.type << "\n\t" <<  field.access_info << std::endl;
+//     return stream;
+// }

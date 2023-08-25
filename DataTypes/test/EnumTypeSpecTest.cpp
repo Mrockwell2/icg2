@@ -111,7 +111,7 @@ TEST_F(EnumDataTypeTest, toString ) {
 
     EXPECT_EQ(true, addDayOfWeekEnumToTypeDictionary(typeDictionary, enumDictionary));
 
-    const DataType* dataType = typeDictionary->lookup("DayOfWeek");
+    std::shared_ptr<const DataType> dataType = typeDictionary->lookup("DayOfWeek");
     ASSERT_TRUE(dataType != NULL) ;
 
     // Print the duplicate CompositeDataType.
@@ -128,23 +128,6 @@ TEST_F(EnumDataTypeTest, toString ) {
                       "Saturday = 7}\n",s);
 }
 
-TEST_F(EnumDataTypeTest, assignment_operator) {
-    // ARRANGE
-    EnumDataType e1( enumDictionary, "Fruit", sizeof(int) );
-    e1.addEnumerator("Apple", 0);
-    e1.addEnumerator("Orange", 1);
-    e1.addEnumerator("Pear", 2);
-
-    EnumDataType e2( enumDictionary, "Veggie", sizeof(short) );
-    e2.addEnumerator("Broccoli", 0);
-
-    // ACT
-    e1 = e2;
-
-    // ASSERT
-    EXPECT_EQ(e2.getSize(), e1.getSize());
-    EXPECT_EQ(e2.getTypeSpecName(), e1.getTypeSpecName());
-}
 
 TEST_F(EnumDataTypeTest, bad_size) {
     try {

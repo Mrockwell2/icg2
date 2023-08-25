@@ -25,23 +25,7 @@ CompositeDataType::CompositeDataType( std::string name,
     this->deAllocator = deAllocator;
 }
 
-// CONSTRUCTOR
-CompositeDataType::CompositeDataType ( const CompositeDataType & original ) {
 
-    this->structSize = original.structSize;
-    this->is_valid = original.is_valid;
-    this->name = original.name;
-    this->allocator = original.allocator;
-    this->deAllocator = original.deAllocator;
-
-    for (auto member : original.normalMemberList) {
-        this->normalMemberList.push_back( member->clone() );
-    }
-
-    for (auto member : original.staticMemberList) {
-        this->staticMemberList.push_back( member->clone() );
-    }
-}
 
 // DESTRUCTOR
 CompositeDataType::~CompositeDataType() {
@@ -54,32 +38,8 @@ CompositeDataType::~CompositeDataType() {
     }
 }
 
-// OPERATOR=
-CompositeDataType & CompositeDataType::operator=( CompositeDataType rhs)  {
-    swap(*this, rhs);
-    return *this;
-}
 
-// SWAP
-void swap(CompositeDataType& a, CompositeDataType& b) 
-{
-    // enable ADL
-    using std::swap;
-    swap(a.is_valid, b.is_valid);
-    swap(a.name, b.name);
-    swap(a.allocator, b.allocator);
-    swap(a.deAllocator, b.deAllocator);
-    swap(a.normalMemberList , b.normalMemberList);
-    swap(a.staticMemberList , b.staticMemberList);
-    swap(a.structSize , b.structSize);
-}
-
-DataType * CompositeDataType::clone() const {
-    return new CompositeDataType( *this );
-}
-
-
-bool CompositeDataType::validate(const DataTypeInator * dataTypeInator) {
+bool CompositeDataType::validate(DataTypeInator * dataTypeInator) {
 
     // (from John) FIXME: Check for circular dependencies.
     // Also need a to check that this->subType (ptr) is not equal
@@ -171,7 +131,7 @@ std::string CompositeDataType::getTypeSpecName() const {
 }
 
 bool CompositeDataType::accept (DataTypeVisitor * visitor) const {
-    return visitor->visitCompositeType(this);
+    return visitor->visitCompositeType(std::static_pointer_cast<const CompositeDataType>(shared_from_this()));
 }
 
 

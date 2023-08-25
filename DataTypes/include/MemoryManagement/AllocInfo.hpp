@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include <vector>
 #include <string>
+#include <memory>
 
 class DataType;
 class CompositeDataType;
@@ -33,7 +34,7 @@ class AllocInfo {
 
     public:
     AllocInfo( const std::string& varName,
-            const DataType * type,
+            std::shared_ptr<const DataType> type,
             void*            suppliedAllocation = 0)  ;
 
     // Delete the copy constructor.
@@ -89,7 +90,7 @@ class AllocInfo {
     /**
      @return the DataType for the allocation.
      */
-    const DataType * getDataType() const;
+    std::shared_ptr<const DataType> getDataType() const;
 
     /**
      @return Get 
@@ -123,14 +124,14 @@ class AllocInfo {
     private:
 
     void initialize( const std::string& varName,
-                     const DataType * type,
+                     std::shared_ptr<const DataType> type,
                      void*              suppliedAllocation )  ;
 
     std::string     name;                        /**< ** Object name */
     void*           start;                       /**< ** Address where this allocation starts */
     void*           end;                         /**< ** Address where this allocation ends */
 
-    const DataType* dataType;                    /**< **  */
+    std::shared_ptr<const DataType> dataType;                    /**< **  */
 
     StorageClass::e storageClass;                /**< ** Storage class */
 

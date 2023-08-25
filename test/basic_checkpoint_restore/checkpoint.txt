@@ -7,8 +7,8 @@ clear_all_vars();
 
 
 // Variable Assignments.
-a.my_int = 0 ;
-a.my_nested_class.foo_int = 0 ;
+a.my_int = 100 ;
+a.my_nested_class.foo_int = 42 ;
 a.my_nested_class.my_arr[0] = 5 ;
 a.my_nested_class.my_arr[1] = 6 ;
 a.my_nested_class.my_arr[2] = 7 ;

@@ -20,49 +20,23 @@ ArrayDataType:: ArrayDataType( std::string typeSpecName, unsigned int n_elems ) 
 /* ================================================================================= */
 /*                         RULE OF THREE (and a half) INTERFACE                      */
 /* ================================================================================= */
-ArrayDataType::ArrayDataType ( ArrayDataType const & original) {
-    is_valid = original.is_valid;
-    typeSpecName = original.typeSpecName;
-    elementCount = original.elementCount;
-    if (original.subType != NULL) {
-        subType = original.subType->clone();
-    } else {
-        subType = NULL;
-    }
-}
+// ArrayDataType::ArrayDataType ( ArrayDataType const & original) {
+//     is_valid = original.is_valid;
+//     typeSpecName = original.typeSpecName;
+//     elementCount = original.elementCount;
+//     subType = original.subType;
+// }
 
 
 
 // DESTRUCTOR
 ArrayDataType::~ArrayDataType () {
-    if ( typeSpecName.empty()) {
-        delete subType;
-    }
+
 }
 
-// ASSIGNMENT OPERATOR
-ArrayDataType& ArrayDataType::operator=( ArrayDataType rhs ) {
-    swap(*this, rhs);
-    return *this;
-}
-
-// SWAP
-void swap(ArrayDataType& a, ArrayDataType& b) 
-{
-    // enable ADL
-    using std::swap;
-    swap(a.is_valid, b.is_valid);
-    swap(a.typeSpecName, b.typeSpecName);
-    swap(a.elementCount, b.elementCount);
-    swap(a.subType, b.subType);
-}
-
-DataType * ArrayDataType::clone () const {
-    return new ArrayDataType( *this );
-}
 
 // MEMBER FUNCTION
-bool ArrayDataType::validate(const DataTypeInator * dataTypeInator) {
+bool ArrayDataType::validate(DataTypeInator * dataTypeInator) {
 
     if (!is_valid) {
 
@@ -145,5 +119,10 @@ unsigned int ArrayDataType::getElementCount() const {
 }
 
 bool ArrayDataType::accept (DataTypeVisitor * visitor) const {
-    return visitor->visitArrayType(this);
+    return visitor->visitArrayType(std::static_pointer_cast<const ArrayDataType>(shared_from_this()));
 }
+
+std::shared_ptr<const DataType> ArrayDataType::getSubType() const {
+    return subType;
+}
+

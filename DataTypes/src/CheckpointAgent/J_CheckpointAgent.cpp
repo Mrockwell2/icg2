@@ -5,12 +5,14 @@
 #include "Type/DataType.hpp"
 #include "Value/PointerValue.hpp"
 #include "Value/StringValue.hpp"
-
+#include "Value/IntegerValue.hpp"
 #include "Algorithm/DataTypeAlgorithm.hpp"
 
 const std::string J_CheckpointAgent::error_str = "<UNDEFINED>";
+const std::string J_CheckpointAgent::resize_command = "RESIZE_STL";
 
-J_CheckpointAgent::J_CheckpointAgent(const DataTypeInator * inator) : dataTypeInator(inator) {}
+
+J_CheckpointAgent::J_CheckpointAgent(DataTypeInator * inator) : dataTypeInator(inator) {}
 
 
 /* ==================================================================== */
@@ -43,11 +45,7 @@ int J_CheckpointAgent::dump ( std::ostream& checkpoint_out, std::vector<AllocInf
         }
     }
 
-    // 3) Write a "clear_all_vars" command.
-    checkpoint_out << std::endl << std::endl << "// Clear all allocations to 0." << std::endl;
-    checkpoint_out << "clear_all_vars();" << std::endl;
-
-    // 4) Dump the contents of each of the local and extern allocations.
+    // Dump the contents of each of the local and extern allocations.
     checkpoint_out << std::endl << std::endl << "// Variable Assignments." << std::endl;
     checkpoint_out.flush();
 
@@ -89,6 +87,12 @@ bool J_CheckpointAgent::writeAssignment( std::ostream& checkpoint_out, const All
 
             value = "&" + ptr_name;
 
+        } else if (leaf.is_stl) {
+            checkpoint_out << resize_command << " ";
+            value = std::to_string(leaf.stl_size);
+        } else if (leaf.value->getValueType() == Value::ValueType::STRING) {
+            StringValue * str_val = static_cast<StringValue *> (leaf.value);
+            value = str_val->getEscapedString();
         } else {
             value = leaf.value->toString();
         }
@@ -99,7 +103,7 @@ bool J_CheckpointAgent::writeAssignment( std::ostream& checkpoint_out, const All
 }
 
 
-std::string J_CheckpointAgent::resolvePointer(void * ptr_to_resolve, const DataType * expected_type, const std::vector<AllocInfo *>& allocs_to_search) {
+std::string J_CheckpointAgent::resolvePointer(void * ptr_to_resolve, std::shared_ptr<const DataType> expected_type, const std::vector<AllocInfo *>& allocs_to_search) {
     for (auto allocInfo : allocs_to_search) {
         if (allocInfo->contains(ptr_to_resolve)) {
 
@@ -142,25 +146,30 @@ std::vector<AllocInfo *> J_CheckpointAgent::restore( std::istream& checkpoint_in
         if (checkpoint_line.size() == 0) continue;
         
         // Ignore anything that begins with "//"
-        if (checkpoint_line.substr(0,2) == "//") continue;
-        if (checkpoint_line.substr(0,9) == "clear_all") continue;  // TODO: DONT DO THIS
+        if (checkpoint_line.find("//") == 0) continue;
+        if (checkpoint_line.find("clear_all") == 0) continue;  // TODO: DONT DO THIS
 
-        // If a line has an "=" it's an assignment. If it doesn't, it's a declaration.
-        if (checkpoint_line.find("=") == std::string::npos) {
-            // Parse this line as a declaration
-            try {
-                allocations_to_restore.push_back(restoreDeclaration(checkpoint_line));
-            } catch (std::exception& e) {
-                std::cerr << "J_CheckpointAgent: An error occurred while processing declaration \"" << checkpoint_line << "\"\n\tMessage: " << e.what() << std::endl;
-            }
-
+        // Handle special commands
+        if (checkpoint_line.find(resize_command) != std::string::npos ) {
+            handleResizeCommand (checkpoint_line, allocations_to_restore);
         } else {
-            // Parse this line as an assignment
-            try {
-                restoreAssignment(checkpoint_line, allocations_to_restore);
-            } catch (std::exception& e) {
-                // TODO: BETTER ERROR AND WARNING SYSTEM
-                std::cerr << "J_CheckpointAgent: An error occurred while processing assignment \"" << checkpoint_line << "\"\n\tMessage: " << e.what() << std::endl;
+            // If a line has an "=" it's an assignment. If it doesn't, it's a declaration.
+            if (checkpoint_line.find("=") == std::string::npos) {
+                // Parse this line as a declaration
+                try {
+                    allocations_to_restore.push_back(restoreDeclaration(checkpoint_line));
+                } catch (std::exception& e) {
+                    std::cerr << "J_CheckpointAgent: An error occurred while processing declaration \"" << checkpoint_line << "\"\n\tMessage: " << e.what() << std::endl;
+                }
+
+            } else {
+                // Parse this line as an assignment
+                try {
+                    restoreAssignment(checkpoint_line, allocations_to_restore);
+                } catch (std::exception& e) {
+                    // TODO: BETTER ERROR AND WARNING SYSTEM
+                    std::cerr << "J_CheckpointAgent: An error occurred while processing assignment \"" << checkpoint_line << "\"\n\tMessage: " << e.what() << std::endl;
+                }
             }
         }
     }
@@ -230,7 +239,7 @@ bool J_CheckpointAgent::restoreAssignment(std::string assignment_string, const s
         throw std::logic_error("Could not find variable named " + full_varname);
     }
 
-    const DataType * this_type = result.type;
+    std::shared_ptr<const DataType> this_type = result.type;
     void * this_addr = result.address;
 
     // Special case - pointer :(
@@ -239,8 +248,12 @@ bool J_CheckpointAgent::restoreAssignment(std::string assignment_string, const s
         // There's a better design than this
         // But we gotta handle special cases one way or another
 
-        StringValue * ptr_name_value = dynamic_cast<StringValue *> (this_value);
-        if (ptr_name_value == NULL ||  ptr_name_value->getRawString().size() < 2 ||  ptr_name_value->getRawString().at(0) != '&' ) {
+        if (this_value->getValueType() != Value::ValueType::STRING) {
+            throw std::logic_error(full_varname + " is a pointer, but the value assigned is not compatible.");
+        }
+
+        StringValue * ptr_name_value = static_cast<StringValue *> (this_value);
+        if (ptr_name_value->getRawString().size() < 2 ||  ptr_name_value->getRawString().at(0) != '&' ) {
             throw std::logic_error(full_varname + " is a pointer, but the value assigned is not compatible.");
         }
 
@@ -266,4 +279,39 @@ bool J_CheckpointAgent::restoreAssignment(std::string assignment_string, const s
     }
 
     return true;
+}
+
+void J_CheckpointAgent::handleResizeCommand (std::string command_str, const std::vector<AllocInfo *>& allocs_to_search) {
+    // Strip off command name from front of string
+    int cmd_position = command_str.find(resize_command);
+    if (cmd_position != std::string::npos) {
+        int assignment_start = cmd_position + resize_command.size();
+        command_str = command_str.substr(assignment_start);
+    }
+
+    ParsedAssignment assignment(command_str);
+
+    // Parsing this assignment gets us the variable name and creates the Value object
+    std::string full_varname = assignment.getVariableName();
+    Value * size_value = assignment.getValue();
+
+    if (size_value->getValueType() != Value::ValueType::INTEGER) {
+        std::cerr << "Invalid STL resize command: " << command_str << std::endl;
+        return;
+    }
+
+    IntegerValue * size_value_int = static_cast<IntegerValue *> (size_value);
+    int num_elems = size_value_int->getIntegerValue();
+
+    MutableVariableName var_elems (full_varname);
+    std::string root_name = var_elems.pop_front();
+    AllocInfo * alloc_to_assign = findAllocByName(root_name, allocs_to_search);
+
+    // If the root allocation doesn't exist, nothing to do
+    if (alloc_to_assign == NULL) {
+        std::cerr << "Could not find " << full_varname << " in memory managed allocations." << std::endl;
+        return;
+    }
+
+    DataTypeAlgorithm::resizeSequence(alloc_to_assign->getDataType(), alloc_to_assign->getStart(), var_elems.toString(), num_elems);
 }

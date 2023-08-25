@@ -4,6 +4,7 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include <deque>
 
 #include "Utils/LexicalAnalyzer.hpp"
 
@@ -22,21 +23,26 @@ class MutableDeclaration {
 
     std::vector<int> getDims() const;
 
-    std::string getDeclarator(std::string varName);
-    std::string getAbstractDeclarator();
+    std::string getDeclarator(std::string varName) const;
+    std::string getAbstractDeclarator() const;
 
     int popDimension();
     void pushDimension(int dim);
 
-    bool validateDimensions();
+    std::string popQualifier();
+    void pushQualifier(std::string name);
+    int getQualifiedNamePartsSize() const;
+
+    bool validateDimensions() const;
 
     private:
     
-    bool is_valid_dimension (int dim);
+    static bool is_valid_dimension (int dim);
 
-    std::string typeSpec;
+    // std::string typeSpec;
     std::string varName;
     std::vector<int> dims;
+    std::deque<std::string> qualified_name_parts;
 };
 
 #endif

@@ -3,7 +3,7 @@
 
 namespace DataTypeAlgorithm {
 
-    void checkType(const DataType * node, const char * function_name) {
+    void checkType(std::shared_ptr<const DataType> node, const char * function_name) {
         if (node == NULL) {
             std::string error_msg = std::string(function_name) + " cannot be run: DataType parameter is null";
             throw std::logic_error (error_msg);
@@ -15,14 +15,14 @@ namespace DataTypeAlgorithm {
         }
     }    
 
-    ContainsPointer::Result containsPointer(const DataType * node) {
+    ContainsPointer::Result containsPointer(std::shared_ptr<const DataType> node) {
         checkType(node, __FUNCTION__);
 
         ContainsPointer::ContainsPointerVisitor visitor;
         return visitor.go(node);
     }
 
-    FindLeaves::Result findLeaves(const DataType * node, std::string starting_name, void * starting_address) {
+    FindLeaves::Result findLeaves(std::shared_ptr<const DataType> node, std::string starting_name, void * starting_address) {
         checkType(node, __FUNCTION__);
 
         FindLeaves::FindLeavesVisitor visitor(starting_name, starting_address);
@@ -51,7 +51,7 @@ namespace DataTypeAlgorithm {
     }
 
 
-    LookupAddressAndTypeByName::Result _lookupAddressAndTypeByName (const DataType * node, LookupAddressAndTypeByName::LookupAddressAndTypeByNameVisitor& visitor) {
+    LookupAddressAndTypeByName::Result _lookupAddressAndTypeByName (std::shared_ptr<const DataType> node, LookupAddressAndTypeByName::LookupAddressAndTypeByNameVisitor& visitor) {
         checkType(node, __FUNCTION__);
 
         bool status = visitor.go(node);
@@ -63,21 +63,21 @@ namespace DataTypeAlgorithm {
         return visitor.getResult();
     }
 
-    LookupAddressAndTypeByName::Result lookupAddressAndTypeByName (const DataType * node, void * starting_address, std::string full_name) {
+    LookupAddressAndTypeByName::Result lookupAddressAndTypeByName (std::shared_ptr<const DataType> node, void * starting_address, std::string full_name) {
         checkType(node, __FUNCTION__);
 
         LookupAddressAndTypeByName::LookupAddressAndTypeByNameVisitor visitor(starting_address, full_name);
         return _lookupAddressAndTypeByName(node, visitor);
     }
 
-    LookupAddressAndTypeByName::Result lookupAddressAndTypeByName (const DataType * node, void * starting_address, MutableVariableName name_elems) {
+    LookupAddressAndTypeByName::Result lookupAddressAndTypeByName (std::shared_ptr<const DataType> node, void * starting_address, MutableVariableName name_elems) {
         checkType(node, __FUNCTION__);
 
         LookupAddressAndTypeByName::LookupAddressAndTypeByNameVisitor visitor(starting_address, name_elems);
         return _lookupAddressAndTypeByName(node, visitor);
     }
 
-    LookupNameByAddressAndType::Result lookupNameByAddressAndType (const DataType * node, std::string starting_name, void * starting_address, void * lookup_address, const DataType * const search_type) {
+    LookupNameByAddressAndType::Result lookupNameByAddressAndType (std::shared_ptr<const DataType> node, std::string starting_name, void * starting_address, void * lookup_address, std::shared_ptr<const DataType> const search_type) {
         checkType(node, __FUNCTION__);
 
         try {
@@ -99,21 +99,21 @@ namespace DataTypeAlgorithm {
         }
     }
 
-    void printValue(const DataType * node, std::ostream& s, void * address) {
+    void printValue(std::shared_ptr<const DataType> node, std::ostream& s, void * address) {
         checkType(node, __FUNCTION__);
         
         PrintValue::PrintValueVisitor visitor(s, address);
         visitor.go(node);
     }
 
-    AssignValue::Result assignValue(const DataType * node, Value * val, void * address) {
+    AssignValue::Result assignValue(std::shared_ptr<const DataType> node, Value * val, void * address) {
         checkType (node, __FUNCTION__);
 
         AssignValue::AssignValueVisitor visitor(val, address);
         return visitor.go(node);
     }
 
-    GetValue::Result getValue(const DataType * node, void * address) {
+    GetValue::Result getValue(std::shared_ptr<const DataType> node, void * address) {
         checkType (node, __FUNCTION__);
 
         GetValue::GetValueVisitor visitor(address);
@@ -122,11 +122,19 @@ namespace DataTypeAlgorithm {
         return visitor.getResult();
     }
 
-    void clearValue(const DataType * node, void * address) {
+    void clearValue(std::shared_ptr<const DataType> node, void * address) {
         checkType (node, __FUNCTION__);
 
         ClearValue::ClearValueVisitor visitor(address);
         visitor.go(node);
     }   
+
+
+    bool resizeSequence(std::shared_ptr<const DataType> node, void * starting_address, std::string full_name, int num_elems) {
+        checkType (node, __FUNCTION__);
+
+        ResizeSequence::ResizeSequenceVisitor visitor(starting_address, full_name, num_elems);
+        return visitor.go(node);   
+    }
     
 }

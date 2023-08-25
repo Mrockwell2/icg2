@@ -30,6 +30,6 @@ bool TypedStructMember::validate() {
 }
 
 // MEMBER FUNCTION
-const DataType * TypedStructMember::getDataType() const {
+std::shared_ptr<const DataType> TypedStructMember::getDataType() const {
     return subType;
 }

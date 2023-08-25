@@ -19,10 +19,6 @@ public:
 
     // Rule of 5 is default.
 
-    /**
-     Clone.
-     */
-    StaticStructMember * clone () const;
 
     /**
      * @brief Get the address of the StructMember

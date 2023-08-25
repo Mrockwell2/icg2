@@ -1,6 +1,28 @@
 
 #pragma once
 
+
+#include "TypeDictionary.hpp"
+#include "Type/DataType.hpp"
+
+
+class TypeDictionary;
+
+class DataTypeInator {
+    public:
+        DataTypeInator ();
+        DataTypeInator (TypeDictionary * dict);
+
+        std::shared_ptr<const DataType> resolve(std::string name);
+        void addToDictionary(std::string name, DataType * typeSpec);
+
+        bool validateDictionary();
+
+
+    private:
+        TypeDictionary * typeDictionary;
+};
+
 // ⡹⢌⠳⡘⢦⡙⢆⠳⣌⠳⡘⡜⢢⠝⣢⠓⡬⢓⡌⢳⡘⢦⡙⢆⠳⣌⠳⡘⡜⢢⠝⢢⠓⡬⢓⡌⢳⡘⢦⡙⢆⠳⣌⠳⡘⡜⢢⠝⢢⠓⡬⢓⡌⢳⡘⠦⡙⢆⠳⡌⠳⣌⠳⡘⡜⢢⢃⠳⣌⠳⡘⡜⢢⠝⡰⢃⠮⡑⢎⡜⠦⡙⢆⠳⣌⠳⣌⠳⡘⢦⡙⢆⠳⣌⠳⡘⡜⢢⠝⣢⠓⡬
 // ⡱⢋⠵⡉⢦⠙⡌⡓⡌⢣⡑⢎⡱⢊⠴⣉⠖⡡⢎⡱⡘⠆⡍⢎⡱⢌⢣⡑⢎⡱⢊⠥⣋⠔⡣⢜⡡⢚⠤⡙⡌⢓⡌⡱⠱⢌⠣⠎⠥⢋⡔⢣⡘⠅⢎⠱⡉⢎⠱⢌⠓⠤⢣⠱⢌⢃⠎⡱⢌⠣⡱⢌⠣⢎⠱⣉⠖⣩⠒⣌⢣⡙⡌⡓⠬⡱⣈⢇⡙⢢⢍⢪⠱⢌⢣⡑⢎⡱⢊⠴⣉⠖
 // ⢣⢋⠖⣉⠦⡙⡰⢱⡈⢇⡜⠢⣅⢋⠴⡨⠜⡡⢆⡱⢌⢓⡘⢆⡱⢊⠴⡘⢢⢅⠫⡔⢌⠎⣑⠢⢅⠣⠚⢤⠉⡆⢒⠡⡃⢎⠱⣈⢃⠎⡰⢡⠘⡘⢌⠢⠱⡈⠖⣈⠎⡑⠦⡑⢊⠌⡒⣡⠊⡔⣡⠊⢆⡉⠦⣁⠚⢤⠩⠔⡢⢱⠨⣑⠣⢱⡐⣊⠬⡡⢎⠢⡍⢆⠣⠜⡢⢅⡋⠴⡨⠜
@@ -52,25 +74,3 @@
 // ⢇⡫⢜⠡⢎⡘⣌⠲⢌⡱⠌⣆⠣⢚⡔⢢⡑⠎⡬⣑⠢⢍⢢⡙⠤⣃⠹⢌⠢⣿⠁⠀⢀⣤⣾⠀⠀⠀⠙⠳⠇⠀⠀⠀⣿⣿⠒⢦⣀⠀⠀⠘⠀⠀⠀⠀⠀⠀⣿⠌⣂⡾⠁⠀⠀⠀⠀⢸⠀⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠀⠀⠀⢠⠁⢰⠇⠀⠀⠀⠀⠀⠀⣿⠀⠀⠀⠀⠀⢹⡔
 // ⢣⡜⡌⡓⣌⠲⢌⠲⣡⠒⡍⢤⢋⡒⢬⡁⢎⡱⠒⣌⠱⣊⠒⡬⢱⢨⡑⠎⣽⡷⠀⠀⢸⡇⢾⡇⠀⠀⠀⠀⠀⠀⠀⠀⠈⠁⠀⠀⣯⣷⠀⠀⠀⠀⠀⠀⠀⢸⣇⢚⡾⠁⠀⠀⠀⠀⢀⣾⢰⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠀⠀⠀⡘⠀⡞⠀⠀⠀⠀⠀⠀⠀⡇⠀⠀⠀⠀⠀⢸⡎
 // ⠧⣜⡰⣑⠢⣃⢎⡱⢄⡋⡜⡰⢊⡜⡰⣘⠢⣅⠫⢄⠳⣈⠵⡘⢢⢅⡚⠜⡸⣇⠀⠀⠀⠻⡾⠇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣻⠀⠀⠀⠀⠀⠀⢀⡿⢢⡟⠁⠀⠀⠀⠀⢠⣟⡇⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠀⠀⢠⠃⡰⠁⠀⠀⠀⠀⠀⠀⠀⡇⠀⠀⠀⠀⠀⠘⡧
-
-
-#include "Type/DataType.hpp"
-#include "Type/BaseType.hpp"
-
-
-class TypeDictionary;
-
-class DataTypeInator {
-    public:
-        DataTypeInator ();
-        DataTypeInator (TypeDictionary * dict);
-
-        const DataType * resolve(std::string name) const;
-        void addToDictionary(std::string name, BaseType * typeSpec);
-
-        bool validateDictionary();
-
-
-    private:
-        TypeDictionary * typeDictionary;
-};

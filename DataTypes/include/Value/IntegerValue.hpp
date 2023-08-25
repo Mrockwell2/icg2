@@ -20,23 +20,26 @@ class IntegerValue : public NumericValue {
      Get the value of the IntegerValue as floating point.
      @return the value as a double.
      */
-    double getFloatingPointValue();
+    double getFloatingPointValue() const;
 
     /**
      Get the value of this IntegerValue as an integer.
      @return the value as a long long int.
      */
-    long long getIntegerValue();
+    long long getIntegerValue() const;
 
     /**
      Print this FloatingPointValue to a stream.
      */
-    void print(std::ostream &s);
+    void print(std::ostream &s) const;
 
     /**
      Get a string representation of this IntegerValue.
      */
-    std::string toString();
+    std::string toString() const;
+
+    inline ValueType getValueType() const override { return ValueType::INTEGER; }
+
 
     private:
     long long value;

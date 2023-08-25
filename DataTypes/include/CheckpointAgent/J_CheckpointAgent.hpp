@@ -10,7 +10,7 @@ class J_CheckpointAgent : public CheckpointAgentBase {
 
     public:
 
-    J_CheckpointAgent(const DataTypeInator * inator);
+    J_CheckpointAgent(DataTypeInator * inator);
 
     /**
      */
@@ -22,14 +22,21 @@ class J_CheckpointAgent : public CheckpointAgentBase {
     /* ==================================================================== */
 
     /**
+     * @brief Dump a checkpoint to the given string
      * 
-     Dump Checkpoint
-        */
+     * @param checkpoint_out stream to output to
+     * @param allocations_to_checkpoint Allocations to checkpoint
+     * @return int status
+     */
     virtual int dump ( std::ostream& checkpoint_out, std::vector<AllocInfo *> allocations_to_checkpoint) override;
 
     /**
-     Restore Checkpoint.
-        */
+     * @brief Restore a checkpoint from an input stream
+     * 
+     * @param checkpoint_in stream to read from
+     * @param allocations_to_restore Extern allocs to work with
+     * @return std::vector<AllocInfo *> The new set of AllocInfos (local and extern)
+     */
     virtual std::vector<AllocInfo *> restore( std::istream& checkpoint_in, std::vector<AllocInfo *> allocations_to_restore) override;
 
 
@@ -46,17 +53,15 @@ class J_CheckpointAgent : public CheckpointAgentBase {
 
     private:
 
-    const DataTypeInator * dataTypeInator;
-
-    /**
-     Write a declaration that describes the given ALLOC_INFO object.
-    @return whether an error-condition has happened.
-    */
+    DataTypeInator * dataTypeInator;
 
     static std::string getCheckpointableName(const AllocInfo * alloc);
-    static std::string resolvePointer(void * ptr_to_resolve, const DataType * expected_type, const std::vector<AllocInfo *>& allocs_to_search);
+    static std::string resolvePointer(void * ptr_to_resolve, std::shared_ptr<const DataType> expected_type, const std::vector<AllocInfo *>& allocs_to_search);
     static AllocInfo * findAllocByName(std::string name, std::vector<AllocInfo *> search_allocs);
     static void *  lookupPointer(std::string varname, const std::vector<AllocInfo *>& allocs_to_search);
+    static void handleResizeCommand (std::string command_str, const std::vector<AllocInfo *>& allocs_to_search);
 
-    static const std::string error_str;
+    static const std::string error_str ;
+    static const std::string resize_command ;
+
 };

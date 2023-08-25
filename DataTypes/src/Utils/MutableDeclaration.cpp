@@ -9,7 +9,7 @@ MutableDeclaration::MutableDeclaration( std::string s ) : MutableDeclaration(s, 
 
 MutableDeclaration::MutableDeclaration( std::string base_type, std::vector<int> dimensions) : dims(dimensions) {
     ParsedDeclaration parser(base_type);
-    this->typeSpec = parser.getTypeSpecifier();
+    this->qualified_name_parts = parser.getQualifiedNameParts();
     this->varName = parser.getVariableName();
 
     std::vector<int> other_dims = parser.getDims();
@@ -18,7 +18,17 @@ MutableDeclaration::MutableDeclaration( std::string base_type, std::vector<int> 
 }
 
 std::string MutableDeclaration::getTypeSpecifier() const {
-    return typeSpec;
+    std::stringstream ss;
+
+    for (int i = 0; i < qualified_name_parts.size(); i++) {
+        if (i != 0) {
+            ss << "::";
+        }
+
+        ss << qualified_name_parts.at(i);
+    }
+
+    return ss.str();
 }
 
 std::string MutableDeclaration::getVariableName() const {
@@ -39,7 +49,7 @@ std::vector<int> MutableDeclaration::getDims() const {
 }
 
 // Reference for this algorithm: https://eli.thegreenplace.net/2008/07/18/reading-c-type-declarations/
-std::string MutableDeclaration::getDeclarator(std::string varName) {
+std::string MutableDeclaration::getDeclarator(std::string varName) const {
     if (!validateDimensions()) {
         std::cerr << "Invalid dimensions. All dimensions must be a positive number or -1 to denote a pointer." << std::endl;
         return "";
@@ -48,7 +58,7 @@ std::string MutableDeclaration::getDeclarator(std::string varName) {
     std::stringstream ss;
 
     // Type goes first
-    ss << typeSpec;
+    ss << getTypeSpecifier();
 
     if (varName != "") {
         ss << " ";
@@ -91,7 +101,7 @@ std::string MutableDeclaration::getDeclarator(std::string varName) {
 
 }
 
-std::string MutableDeclaration::getAbstractDeclarator() {
+std::string MutableDeclaration::getAbstractDeclarator() const{
     return getDeclarator("");
 }
 
@@ -99,7 +109,7 @@ bool MutableDeclaration::is_valid_dimension (int dim) {
     return dim == -1 || dim >= 1;
 }
 
-bool MutableDeclaration::validateDimensions() {
+bool MutableDeclaration::validateDimensions() const {
     for (int dim : dims) {
         if (!is_valid_dimension(dim)) {
             return false;
@@ -119,7 +129,20 @@ int MutableDeclaration::popDimension() {
 }
 
 void MutableDeclaration::pushDimension(int dim) {
-
     dims.insert(dims.begin(), dim);
+}
 
+std::string MutableDeclaration::popQualifier() {
+    std::string ret = qualified_name_parts.front();
+    qualified_name_parts.pop_front();
+
+    return ret;
+}
+
+void MutableDeclaration::pushQualifier(std::string name) {
+    qualified_name_parts.push_front(name);
+}
+
+int MutableDeclaration::getQualifiedNamePartsSize() const {
+    return qualified_name_parts.size();
 }

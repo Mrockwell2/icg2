@@ -18,7 +18,7 @@ namespace LookupNameByAddressAndType {
     // LookupNameByAddressVisitor::LookupNameByAddressVisitor(std::string starting_name, void * starting_address, void * lookup_address) 
     //         : LookupNameByAddressVisitor(starting_name, starting_address, lookup_address, NULL) {}
 
-    LookupNameByAddressVisitor::LookupNameByAddressVisitor(std::string starting_name, void * starting_address, void * lookup_address, const DataType * const search_type)
+    LookupNameByAddressVisitor::LookupNameByAddressVisitor(std::string starting_name, void * starting_address, void * lookup_address, std::shared_ptr<const DataType> const search_type)
             : search_type(search_type) {
 
         name_stack.pushName(starting_name);
@@ -31,7 +31,7 @@ namespace LookupNameByAddressAndType {
 
     // Look for the matching address
 
-    bool LookupNameByAddressVisitor::visitCompositeType(const CompositeDataType * node) {
+    bool LookupNameByAddressVisitor::visitCompositeType(std::shared_ptr<const CompositeDataType> node) {
         if (search_offset == 0) {
             // Address found!
             // Check the type and return
@@ -52,7 +52,7 @@ namespace LookupNameByAddressAndType {
         for (auto it = node->getNormalMemberListBegin(); it != node->getNormalMemberListEnd(); it++) {
             const NormalStructMember * member = *it;
             
-            const DataType * member_subtype = member->getSubType();
+            std::shared_ptr<const DataType> member_subtype = member->getSubType();
             assert(member_subtype != NULL);
 
             int member_offset = member->getOffset();
@@ -78,7 +78,7 @@ namespace LookupNameByAddressAndType {
         return false;
     }
 
-    bool LookupNameByAddressVisitor::visitArrayType(const ArrayDataType * node) {
+    bool LookupNameByAddressVisitor::visitArrayType(std::shared_ptr<const ArrayDataType> node) {
         // std::cout << "Visiting ArrayDataType with subtype " << node->getTypeSpecName() << std::endl;
 
         if (search_offset == 0) {
@@ -100,7 +100,7 @@ namespace LookupNameByAddressAndType {
             return false;
         }
 
-        const DataType * subType = node->getSubType();
+        std::shared_ptr<const DataType> subType = node->getSubType();
 
         // Figure out which element we should go into
         unsigned int elem_index = search_offset / subType->getSize();
@@ -120,26 +120,29 @@ namespace LookupNameByAddressAndType {
         return subType->accept(this);
     }
 
-    bool LookupNameByAddressVisitor::visitPrimitiveDataType(const PrimitiveDataType * node) {
+    bool LookupNameByAddressVisitor::visitPrimitiveDataType(std::shared_ptr<const PrimitiveDataType> node) {
         return visitLeaf(node);
     }
 
-    bool LookupNameByAddressVisitor::visitPointerType(const PointerDataType * node) {
+    bool LookupNameByAddressVisitor::visitPointerType(std::shared_ptr<const PointerDataType> node) {
         // A pointer is a leaf type
         return visitLeaf(node);
     }
 
-    bool LookupNameByAddressVisitor::visitEnumeratedType(const EnumDataType * node) {
+    bool LookupNameByAddressVisitor::visitEnumeratedType(std::shared_ptr<const EnumDataType> node) {
         // An enum is a leaf type
         return visitLeaf(node);
     }
 
-    bool LookupNameByAddressVisitor::visitStringType (const StringDataType * node) {
+    bool LookupNameByAddressVisitor::visitStringType (std::shared_ptr<const StringDataType> node) {
         return visitLeaf(node);
     }
 
+    bool LookupNameByAddressVisitor::visitSequenceType (std::shared_ptr<const SequenceDataType>  node) {
+        throw std::logic_error("Sequence type not implemented in LookupNameByAddressVisitor");
+    }
 
-    bool LookupNameByAddressVisitor::visitLeaf(const DataType * node) {
+    bool LookupNameByAddressVisitor::visitLeaf(std::shared_ptr<const DataType> node) {
         if (search_offset != 0) {
             std::cerr << "Got to a leaf, but the offset is not 0. Something went wrong. Current name stack: " << name_stack.toString() << "\tCurrent offset: " << search_offset << std::endl;
             return false;
@@ -150,7 +153,7 @@ namespace LookupNameByAddressAndType {
     }
 
 
-    bool LookupNameByAddressVisitor::typeCheck(const DataType * node) {
+    bool LookupNameByAddressVisitor::typeCheck(std::shared_ptr<const DataType> node) {
         // Check equality by comparing toString
         // This is not great but seems ok
         if (search_type != NULL && node->toString() != search_type->toString()) {

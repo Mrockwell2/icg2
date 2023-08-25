@@ -42,6 +42,10 @@ class MutableVariableName {
             return nameElements.front();
         }
 
+        int size() {
+            return nameElements.size();
+        }
+
         bool empty () {
             return nameElements.empty();
         }

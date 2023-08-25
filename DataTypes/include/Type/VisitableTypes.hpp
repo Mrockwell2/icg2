@@ -6,3 +6,4 @@
 #include "EnumDataType.hpp"
 #include "StringDataType.hpp"
 #include "CompositeDataType.hpp"
+#include "SequenceDataType.hpp"

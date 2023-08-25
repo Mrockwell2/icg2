@@ -15,13 +15,16 @@ public:
      */
     StructMember( std::string memberName, std::string typeSpecName );
 
+    StructMember( const StructMember& other ) = delete;
+    ~StructMember();
+
     /**
      * @brief Resolve the type
      * 
      * @return true success
      * @return false failure
      */
-    bool validate(const DataTypeInator* dataTypeInator);
+    bool validate(DataTypeInator* dataTypeInator);
 
     /**
      * @brief Return true if this member is valid
@@ -48,13 +51,13 @@ public:
     /**
      * @brief Get the type of this member
      * 
-     * @return const DataType* 
+     * @return std::shared_ptr<const DataType> 
      */
-    const DataType * getSubType() const;
+    std::shared_ptr<const DataType> getSubType() const;
 
 private:
     bool is_valid;
     std::string name;
     std::string typeSpecName;
-    const DataType * subType;
+    std::shared_ptr<const DataType> subType;
 };

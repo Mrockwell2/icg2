@@ -5,7 +5,6 @@ PROGRAMMERS:
     ()
 */
 #include "included_header.hpp"
-#include <memory>
 
 class MyClass
 {

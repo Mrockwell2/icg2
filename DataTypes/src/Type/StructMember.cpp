@@ -11,7 +11,10 @@ StructMember::StructMember(std::string memberName, std::string typeSpecName)
                         : name(memberName), typeSpecName(typeSpecName), is_valid(false), subType(NULL) {}
 
 
-bool StructMember::validate(const DataTypeInator * dataTypeInator) {
+StructMember::~StructMember() {}
+
+
+bool StructMember::validate(DataTypeInator * dataTypeInator) {
     if (!is_valid) {
         subType = dataTypeInator->resolve(typeSpecName);
         if (subType != NULL) {
@@ -30,7 +33,7 @@ std::string StructMember::getName() const {
     return name;
 }
 
-const DataType * StructMember::getSubType() const {
+std::shared_ptr<const DataType> StructMember::getSubType() const {
     return subType;
 }
 

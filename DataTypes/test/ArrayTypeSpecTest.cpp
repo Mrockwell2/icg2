@@ -46,70 +46,6 @@ TEST_F( ArrayDataTypeTest , constructor_exception ) {
     }
 }
 
-TEST_F( ArrayDataTypeTest, copy_constructor ) {
-
-    try {
-    // Create a ArrayDataType.
-    ArrayDataType* orig = new ArrayDataType(  "float", 7);
-
-    std::cout << orig->toString();
-
-    // Duplicate it.
-    ArrayDataType* copy = new ArrayDataType( *(const ArrayDataType*)orig );
-
-    // Delete the original, so we know the copy is independent.
-    delete orig;
-
-    // Verify that the duplicate ArrayDataType is what we expect.
-    std::stringstream ss;
-    ss << copy->toString();
-    EXPECT_EQ("float[7]", ss.str());
-
-    // Clean up.
-    delete copy;
-
-    } catch ( const std::logic_error& e ) {
-        std::cerr << e.what();
-    }
-
-}
-
-TEST_F( ArrayDataTypeTest , assignment_operator ) {
-
-    // Create an ArrayDataType.
-    ArrayDataType orig = ArrayDataType(  "long", 7);
-
-    std::cout << orig.toString();
-
-    // Assign it to another ArrayDataType.
-    ArrayDataType copy = orig;
-
-    // Verify that the assigned ArrayDataType is what we expect.
-    std::stringstream ss;
-    ss << copy.toString();
-    EXPECT_EQ("long[7]", ss.str());
-}
-
-TEST_F( ArrayDataTypeTest , clone ) {
-
-    // Create a ArrayDataType.
-    // int cdims[] = {3,4,5,-1,-1};
-    ArrayDataType* orig = new ArrayDataType( "int**[4][5]",3);
-    // Clone it.
-    DataType * copy = orig->clone();
-
-    // Delete the original, so we know the copy is independent.
-    delete orig;
-
-    // Verify that the cloned ArrayDataType is what we expect.
-    std::stringstream ss;
-    ss << copy->toString();
-    EXPECT_EQ("int**[3][4][5]", ss.str());
-
-    // Clean up.
-    delete copy;
-}
-
 TEST_F( ArrayDataTypeTest , getSize ) {
 
     // Create a PointerDataType.
@@ -165,9 +101,9 @@ TEST_F( ArrayDataTypeTest , getSubType_1 ) {
     ASSERT_EQ(true, validation_result);
 
     // Get the subType.
-    const DataType * elementTypeSpec;
+    std::shared_ptr<const DataType> elementTypeSpec;
     elementTypeSpec = arrayTypeSpec->getSubType();
-    ASSERT_NE((const DataType *)NULL, elementTypeSpec);
+    ASSERT_NE((std::shared_ptr<const DataType>)NULL, elementTypeSpec);
 
     // Make sure it's: double[3].
     std::stringstream ss;
@@ -193,9 +129,9 @@ TEST_F( ArrayDataTypeTest , getSubType_2 ) {
     ASSERT_EQ(true, validation_result);
 
     // Get the SubType.
-    const DataType * elementTypeSpec;
+    std::shared_ptr<const DataType> elementTypeSpec;
     elementTypeSpec = arrayTypeSpec->getSubType();
-    ASSERT_NE((const DataType *)NULL, elementTypeSpec);
+    ASSERT_NE((std::shared_ptr<const DataType>)NULL, elementTypeSpec);
 
     // Make sure it's: double
     std::stringstream ss;

@@ -10,19 +10,19 @@ StringValue::StringValue(std::string value) {
     this->value = value;
 };
 
-void StringValue::print(std::ostream &s) {
+void StringValue::print(std::ostream &s) const {
     s << value;
 }
 
-std::string StringValue::toString() {
-    return getEscapedString();
+std::string StringValue::toString() const {
+    return getRawString();
 }
 
-std::string StringValue::getRawString() {
+std::string StringValue::getRawString() const {
     return value;
 }
 
-std::string StringValue::getEscapedString() {
+std::string StringValue::getEscapedString() const {
     std::stringstream ss;
 
     ss << "\"";

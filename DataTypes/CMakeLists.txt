@@ -15,6 +15,7 @@ set(DATATYPES_SRC
     Type/PointerDataType.cpp
     Type/PrimitiveDataType.cpp
     Type/SpecifiedPrimitiveDataType.cpp
+    Type/SequenceDataType.cpp
     Type/StringDataType.cpp
     Type/DataType.cpp
     Type/Enumerator.cpp
@@ -36,6 +37,7 @@ set(DATATYPES_SRC
     Algorithm/LookupAddressAndTypeByName.cpp
     Algorithm/LookupNameByAddressAndType.cpp
     Algorithm/PrintValue.cpp
+    Algorithm/ResizeSequence.cpp
     CheckpointAgent/J_CheckpointAgent.cpp
     TypeDictionary.cpp
     DataTypeInator.cpp

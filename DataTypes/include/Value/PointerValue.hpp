@@ -24,12 +24,14 @@ class PointerValue : public Value {
     /**
      Print this PointerValue to a stream.
      */
-    void print(std::ostream &s);
+    void print(std::ostream &s) const override;
 
     /**
      Get a string representation of this PointerValue.
      */
-    std::string toString();
+    std::string toString() const override;
+
+    inline ValueType getValueType() const override { return ValueType::POINTER; }
 
     private:
     void* value;

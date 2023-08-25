@@ -18,12 +18,21 @@ class Value {
     /**
      Print a representation of this Value to the given stream.
      */
-    virtual void print(std::ostream &s) = 0;
+    virtual void print(std::ostream &s) const = 0;
 
     /**
      Get a string representation of this Value.
      */
-    virtual std::string toString() = 0;
+    virtual std::string toString() const = 0;
+
+    enum ValueType {
+        STRING,
+        INTEGER,
+        FLOATING_POINT,
+        POINTER
+    };
+
+    virtual ValueType getValueType() const = 0; 
 
 };
 #endif

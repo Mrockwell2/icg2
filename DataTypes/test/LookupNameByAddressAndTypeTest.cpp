@@ -28,15 +28,15 @@ namespace LookupNameByAddressAndType {
 
 TEST_F(LookupNameByAddressVisitorTest, basic) {
     // ARRANGE
-    SpecifiedPrimitiveDataType<int> int_data_type;
+    std::shared_ptr<DataType> int_data_type (new IntDataType);
     int var_to_search = 100;
 
     int * search_address = &var_to_search;
 
-    LookupNameByAddressVisitor visitor("var_to_search", &var_to_search, search_address, &int_data_type);
+    LookupNameByAddressVisitor visitor("var_to_search", &var_to_search, search_address, int_data_type);
 
     // ACT
-    bool success = int_data_type.accept(&visitor);
+    bool success = int_data_type->accept(&visitor);
     
     // ASSERT
     ASSERT_TRUE(success);
@@ -47,7 +47,7 @@ TEST_F(LookupNameByAddressVisitorTest, basic) {
 
 TEST_F(LookupNameByAddressVisitorTest, array) {
     // ARRANGE
-    const DataType * data_type = dataTypeInator.resolve("int[5]");
+    std::shared_ptr<const DataType> data_type = dataTypeInator.resolve("int[5]");
     int var_to_search[5] = {1, 2, 3, 4, 5};
 
     int * search_address = &var_to_search[3];
@@ -67,12 +67,12 @@ TEST_F(LookupNameByAddressVisitorTest, array) {
 TEST_F(LookupNameByAddressVisitorTest, composite1) {
     // ARRANGE
     addClassOneToTypeDictionary(&dataTypeInator);
-    const DataType * data_type = dataTypeInator.resolve("ClassOne");
+    std::shared_ptr<const DataType> data_type = dataTypeInator.resolve("ClassOne");
     ClassOne var_to_search = {.a = 5, .b = 1.5};
 
     void * search_address = &(var_to_search.b);
 
-    const DataType * search_type = dataTypeInator.resolve("double");
+    std::shared_ptr<const DataType> search_type = dataTypeInator.resolve("double");
 
     LookupNameByAddressVisitor visitor("var_to_search", &var_to_search, search_address, search_type);
 
@@ -89,12 +89,12 @@ TEST_F(LookupNameByAddressVisitorTest, composite1) {
 TEST_F(LookupNameByAddressVisitorTest, composite_array) {
     // ARRANGE
     addClassOneToTypeDictionary(&dataTypeInator);
-    const DataType * data_type = dataTypeInator.resolve("ClassOne[4][3]");
+    std::shared_ptr<const DataType> data_type = dataTypeInator.resolve("ClassOne[4][3]");
     ClassOne var_to_search[4][3];
 
     void * search_address = &(var_to_search[2][2].b);
 
-    const DataType * search_type = dataTypeInator.resolve("double");
+    std::shared_ptr<const DataType> search_type = dataTypeInator.resolve("double");
 
     LookupNameByAddressVisitor visitor("var_to_search", &var_to_search, search_address, search_type);
 
@@ -112,12 +112,12 @@ TEST_F(LookupNameByAddressVisitorTest, composite_array2) {
     // ARRANGE
     addClassOneToTypeDictionary(&dataTypeInator);
     addClassTwoToTypeDictionary(&dataTypeInator);
-    const DataType * data_type = dataTypeInator.resolve("ClassTwo[4][3]");
+    std::shared_ptr<const DataType> data_type = dataTypeInator.resolve("ClassTwo[4][3]");
     ClassTwo var_to_search[4][3];
 
     void * search_address = &(var_to_search[2][2].c1.b);
 
-    const DataType * search_type = dataTypeInator.resolve("double");
+    std::shared_ptr<const DataType> search_type = dataTypeInator.resolve("double");
 
     LookupNameByAddressVisitor visitor("var_to_search", &var_to_search, search_address, search_type);
 
@@ -138,12 +138,12 @@ TEST_F(LookupNameByAddressVisitorTest, search_type_ambiguous) {
     // ARRANGE
     addClassOneToTypeDictionary(&dataTypeInator);
     addClassTwoToTypeDictionary(&dataTypeInator);
-    const DataType * data_type = dataTypeInator.resolve("ClassTwo[4][3]");
+    std::shared_ptr<const DataType> data_type = dataTypeInator.resolve("ClassTwo[4][3]");
     ClassTwo var_to_search[4][3];
 
     void * search_address = &(var_to_search[2][2].c1);
 
-    const DataType * search_type = dataTypeInator.resolve("ClassOne");
+    std::shared_ptr<const DataType> search_type = dataTypeInator.resolve("ClassOne");
 
     LookupNameByAddressVisitor visitor("var_to_search", &var_to_search, search_address, search_type);
 
@@ -161,12 +161,12 @@ TEST_F(LookupNameByAddressVisitorTest, search_type_ambiguous2) {
     // ARRANGE
     addClassOneToTypeDictionary(&dataTypeInator);
     addClassTwoToTypeDictionary(&dataTypeInator);
-    const DataType * data_type = dataTypeInator.resolve("ClassTwo[4][3]");
+    std::shared_ptr<const DataType> data_type = dataTypeInator.resolve("ClassTwo[4][3]");
     ClassTwo var_to_search[4][3];
 
     void * search_address = &(var_to_search[2][2].c1);
 
-    const DataType * search_type = dataTypeInator.resolve("int");
+    std::shared_ptr<const DataType> search_type = dataTypeInator.resolve("int");
 
     LookupNameByAddressVisitor visitor("var_to_search", &var_to_search, search_address, search_type);
 
@@ -184,12 +184,12 @@ TEST_F(LookupNameByAddressVisitorTest, search_type_ambiguous3) {
     // ARRANGE
     addClassOneToTypeDictionary(&dataTypeInator);
     addClassTwoToTypeDictionary(&dataTypeInator);
-    const DataType * data_type = dataTypeInator.resolve("ClassTwo[4][3]");
+    std::shared_ptr<const DataType> data_type = dataTypeInator.resolve("ClassTwo[4][3]");
     ClassTwo var_to_search[4][3];
 
     void * search_address = &(var_to_search);
 
-    const DataType * search_type = dataTypeInator.resolve("int");
+    std::shared_ptr<const DataType> search_type = dataTypeInator.resolve("int");
 
     LookupNameByAddressVisitor visitor("var_to_search", &var_to_search, search_address, search_type);
 
@@ -207,12 +207,12 @@ TEST_F(LookupNameByAddressVisitorTest, search_type_ambiguous4) {
     // ARRANGE
     addClassOneToTypeDictionary(&dataTypeInator);
     addClassTwoToTypeDictionary(&dataTypeInator);
-    const DataType * data_type = dataTypeInator.resolve("ClassTwo[4][3]");
+    std::shared_ptr<const DataType> data_type = dataTypeInator.resolve("ClassTwo[4][3]");
     ClassTwo var_to_search[4][3];
 
     void * search_address = &(var_to_search);
 
-    const DataType * search_type = dataTypeInator.resolve("ClassTwo");
+    std::shared_ptr<const DataType> search_type = dataTypeInator.resolve("ClassTwo");
 
     LookupNameByAddressVisitor visitor("var_to_search", &var_to_search, search_address, search_type);
 
@@ -230,12 +230,12 @@ TEST_F(LookupNameByAddressVisitorTest, search_type_ambiguous5) {
     // ARRANGE
     addClassOneToTypeDictionary(&dataTypeInator);
     addClassTwoToTypeDictionary(&dataTypeInator);
-    const DataType * data_type = dataTypeInator.resolve("ClassTwo[4][3]");
+    std::shared_ptr<const DataType> data_type = dataTypeInator.resolve("ClassTwo[4][3]");
     ClassTwo var_to_search[4][3];
 
     void * search_address = &(var_to_search);
 
-    const DataType * search_type = dataTypeInator.resolve("ClassTwo[3]");
+    std::shared_ptr<const DataType> search_type = dataTypeInator.resolve("ClassTwo[3]");
 
     LookupNameByAddressVisitor visitor("var_to_search", &var_to_search, search_address, search_type);
 

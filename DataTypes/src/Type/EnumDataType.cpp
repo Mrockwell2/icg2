@@ -21,35 +21,10 @@ EnumDataType::EnumDataType( EnumDictionary * dict, std::string n, size_t s) : en
 /*                         RULE OF THREE (and a half) INTERFACE                      */
 /* ================================================================================= */
 
-EnumDataType::EnumDataType ( const EnumDataType & original ) : EnumDataType(original.enumDictionary, original.name, original.enumSize) {
-    enumDictionary = original.enumDictionary;
-    name = original.name;
-    enumSize = original.enumSize;
-
-    for ( auto enumerator : original.enum_list ) {
-        enum_list.push_back( new Enumerator( *enumerator ) );
-    }
-}
-
 EnumDataType::~EnumDataType () {
     for ( auto enumerator :  enum_list ) {
         delete enumerator;
     }
-}
-
-EnumDataType & EnumDataType::operator=( EnumDataType rhs ) {
-    swap(*this, rhs);
-    return *this;
-}
-
-void swap (EnumDataType& a, EnumDataType& b) {
-    // enable ADL
-    using std::swap;
-
-    swap(a.enumDictionary, b.enumDictionary);
-    swap(a.name, b.name);
-    swap(a.enumSize, b.enumSize);
-    swap(a.enum_list, b.enum_list);
 }
 
 
@@ -57,11 +32,7 @@ void swap (EnumDataType& a, EnumDataType& b) {
 /*                           VIRTUAL INTERFACE                          */
 /* ==================================================================== */
 
-DataType * EnumDataType::clone () const {
-    return new EnumDataType( *this );
-}
-
-bool EnumDataType::validate(const DataTypeInator * dataTypeInator) {
+bool EnumDataType::validate(DataTypeInator * dataTypeInator) {
     return true;
 }
 
@@ -147,7 +118,7 @@ std::string EnumDataType::getTypeSpecName() const {
 }
 
 bool EnumDataType::accept (DataTypeVisitor * visitor) const {
-    return visitor->visitEnumeratedType(this);
+    return visitor->visitEnumeratedType(std::static_pointer_cast<const EnumDataType>(shared_from_this()));
 }
 
 void EnumDataType::addEnumerator( std::string name, int value)  {

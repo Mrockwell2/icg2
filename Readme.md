@@ -21,13 +21,12 @@ The choice to use LibClang comes from the Trick project's requirement to support
 ## DataTypes
 
 The DataType is the representation we use to understand type structure at runtime. DataType is the base class of a hierarchy of types that can be used to represent all supported types. The derived classes include:
-- BaseType
-    - PrimitiveDataType<T>
-    - CompositeDataType
-    - StringDataType
-- ModifierType
-    - ArrayDataType
-    - PointerDataType
+- PrimitiveDataType
+- CompositeDataType
+- StringDataType
+- ArrayDataType
+- PointerDataType
+- SequenceType
 
 The DataType interface provides some basic operations over types that can be used to implement more complex algorithms. Includes `getTypeName()`, `getSize()`, the ability to allocate and delete an instance, and the ability to get and set the value given an address (using the `Value` class hierarchy).
 
@@ -64,9 +63,18 @@ double
 - User Defined classes/structs with members of any of the above types
 - Namespaces
 - Nested classes
+- STL sequences (vector, list, deque)
 - Any mix of the above
 
 See the issue board for in progress work.
+
+## Clone
+
+Use a recursive clone to include the repository's submodules
+
+```
+git clone --recursive git://github.com/jdeans289/icg2.git
+```
 
 ## Build
 

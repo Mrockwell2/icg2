@@ -39,31 +39,32 @@ void TypeDictionary::addBuiltinTypes() {
     // FIXME: add the other goofy types (e.g., uint8 ) that were added via the old lexical analyzer.
 
     addTypeDefinition("std::string", new StringDataType());
+    addTypeDefinition("std::basic_string<char>", new StringDataType());
+
 }
 
 
 // MEMBER FUNCTION
-const BaseType* TypeDictionary::lookup(std::string name ) {
+std::shared_ptr<const DataType> TypeDictionary::lookup(std::string name ) {
 
-    ParsedDeclaration decl(name);
-    auto qualifiedNameParts = decl.getQualifiedNameParts();
+    MutableDeclaration decl(name);
 
-    // If it's a built in type, we won't have to deal with qualified name stuff
-    if (qualifiedNameParts.empty()) {
-        auto it = typeDictionary.find(name);
+    // Don't bother with the namespace lookup if there are no namespaces to deal with
+    if (decl.getQualifiedNamePartsSize() <= 1) {
+        auto it = typeDictionary.find(decl.getAbstractDeclarator());
         if (it == typeDictionary.end()) {
             return NULL;
         }
         return it->second;
     } else {
-        return lookup(qualifiedNameParts);
+        return lookup(decl);
     }
 }
 
-const BaseType* TypeDictionary::lookup(std::deque<std::string> nameParts) {
+std::shared_ptr<const DataType> TypeDictionary::lookup(MutableDeclaration& decl) {
     // If the size is 1, then we're in the correct dictionary. Just lookup and return.
-    if (nameParts.size() == 1) {
-        auto it = typeDictionary.find(nameParts.front());
+    if (decl.getQualifiedNamePartsSize() == 1) {
+        auto it = typeDictionary.find(decl.getAbstractDeclarator());
         if (it == typeDictionary.end()) {
             return NULL;
         }
@@ -71,32 +72,30 @@ const BaseType* TypeDictionary::lookup(std::deque<std::string> nameParts) {
     }
 
     // Pop off the front and recurse into the namespace dictionary.
-    std::string thisNamespace = nameParts.front();
-    nameParts.pop_front();
+    std::string thisNamespace = decl.popQualifier();
 
     auto it = namespaceDictionary.find(thisNamespace);
     if (it == namespaceDictionary.end()) {
         return NULL;
     }
 
-    return it->second->lookup(nameParts);
+    return it->second->lookup(decl);
 }
 
 // MEMBER FUNCTION
-void TypeDictionary::addTypeDefinition(std::string name, BaseType * typeSpec)  {
+void TypeDictionary::addTypeDefinition(std::string name, DataType * typeSpec)  {
 
-    const BaseType* preExistingDataType = lookup(name);
+    std::shared_ptr<const DataType> preExistingDataType = lookup(name);
 
     if ( preExistingDataType == NULL ) {
         // Add to dictionary
-        ParsedDeclaration decl(name);
-        auto qualifiedNameParts = decl.getQualifiedNameParts();
+        MutableDeclaration decl(name);
 
         // If it's a built in type, we won't have to deal with qualified name stuff
-        if (qualifiedNameParts.empty()) {
-            typeDictionary[name] = typeSpec;
+        if (decl.getQualifiedNamePartsSize() <= 1) {
+            typeDictionary.emplace(decl.getAbstractDeclarator(), typeSpec);
         } else {
-            addTypeDefinition(qualifiedNameParts, typeSpec);
+            addTypeDefinition(decl, typeSpec);
         }
 
     } else {
@@ -108,16 +107,16 @@ void TypeDictionary::addTypeDefinition(std::string name, BaseType * typeSpec)  {
 
 // PRIVATE MEMBER FUNCTION
 // Assumes lookup check has already been done
-void TypeDictionary::addTypeDefinition(std::deque<std::string> nameParts, BaseType * typeSpec)  {
+void TypeDictionary::addTypeDefinition(MutableDeclaration& decl, DataType * typeSpec)  {
 
-    if (nameParts.size() == 1) {
+    if (decl.getQualifiedNamePartsSize() == 1) {
         // If the qualified name parts only has 1 item, we're at the base.
-        typeDictionary[nameParts.front()] = typeSpec;
+        typeDictionary.emplace(decl.getAbstractDeclarator(), typeSpec);
+
         return;
     }
 
-    std::string thisNamespace = nameParts.front();
-    nameParts.pop_front();
+    std::string thisNamespace = decl.popQualifier();
 
     // Otherwise, we need to look up the namespace
     TypeDictionary * nextLevelDict = NULL;
@@ -132,16 +131,20 @@ void TypeDictionary::addTypeDefinition(std::deque<std::string> nameParts, BaseTy
         nextLevelDict = it->second;
     }
 
-    nextLevelDict->addTypeDefinition(nameParts, typeSpec);
+    nextLevelDict->addTypeDefinition(decl, typeSpec);
 }
 
 // MEMBER FUNCTION
-bool TypeDictionary::validate(const DataTypeInator * dataTypeInator) {
+bool TypeDictionary::validate(DataTypeInator * dataTypeInator) {
+
+    for (auto it : typeDictionary) {
+        if (!it.second->validate(dataTypeInator)) {
+            std::cerr << "Failed to validate type " << it.second->getTypeSpecName() << std::endl;
+            return false;
+        }
+    }
 
     bool valid = true;
-    for (auto it : typeDictionary) {
-        valid &= it.second->validate(dataTypeInator);
-    }
 
     // Validate the nested TypeDictionaries in the namespace dictionary
     for (auto it : namespaceDictionary) {
@@ -202,10 +205,10 @@ std::string TypeDictionary::toString() {
 // MEMBER FUNCTION
 TypeDictionary::~TypeDictionary() {
 
-    // Delete all DataTypes in the map.
-    for ( auto it : typeDictionary ) {
-        delete it.second;
-    }
+    // // Delete all DataTypes in the map.
+    // for ( auto it : typeDictionary ) {
+    //     delete it.second;
+    // }
 
     // Delete all nested TypeDictionaries
     for ( auto it : namespaceDictionary ) {

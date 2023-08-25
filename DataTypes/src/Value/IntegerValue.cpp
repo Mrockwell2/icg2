@@ -8,24 +8,24 @@ IntegerValue::IntegerValue(long long value) {
 };
 
 // MEMBER FUNCTION
-void IntegerValue::print(std::ostream &s) {
+void IntegerValue::print(std::ostream &s) const {
     s << value;
 }
 
 // MEMBER FUNCTION
-std::string IntegerValue::toString() {
+std::string IntegerValue::toString() const {
     std::ostringstream oss;
     oss << value;
     return oss.str();
 }
 
 // MEMBER FUNCTION
-double IntegerValue::getFloatingPointValue() {
+double IntegerValue::getFloatingPointValue() const {
     return (double)value;
 }
 
 // MEMBER FUNCTION
-long long IntegerValue::getIntegerValue() {
+long long IntegerValue::getIntegerValue() const {
     return (long long)value;
 }
 

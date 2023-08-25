@@ -10,9 +10,9 @@ NormalStructMember::NormalStructMember(std::string memberName, int offset, std::
                                         : StructMember(memberName, typeSpecName), byte_offset(offset) {}
 
 
-NormalStructMember * NormalStructMember::clone () const {
-    return new NormalStructMember( *this );
-}
+// NormalStructMember * NormalStructMember::clone () const {
+//     return new NormalStructMember( *this );
+// }
 
 // MEMBER FUNCTION
 int NormalStructMember::getOffset() const {

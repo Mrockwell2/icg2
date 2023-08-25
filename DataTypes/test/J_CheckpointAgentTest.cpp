@@ -2,6 +2,7 @@
 #include "DataTypeTestSupport.hpp"
 #include <sstream>
 #include <gtest/gtest.h>
+#include "Type/SpecifiedSequenceDataType.hpp"
 
 // Class under test
 #include "CheckpointAgent/J_CheckpointAgent.hpp"
@@ -47,10 +48,6 @@ TEST_F (J_CheckpointAgentTest, whole_format_basic_local) {
 int my_int ;
 
 
-// Clear all allocations to 0.
-clear_all_vars();
-
-
 // Variable Assignments.
 my_int = 42 ;
 )");
@@ -76,10 +73,6 @@ TEST_F (J_CheckpointAgentTest, whole_format_basic_extern) {
     // std::cout << ss.str() << std::endl;
 
 std::string expected(R"(// Variable Declarations.
-
-
-// Clear all allocations to 0.
-clear_all_vars();
 
 
 // Variable Assignments.
@@ -144,6 +137,34 @@ var_to_checkpoint.c1.b = 1.5 ;
     EXPECT_EQ(expected, ss.str());
 }
 
+TEST_F (J_CheckpointAgentTest, vector_assignment) {
+    // ARRANGE
+
+    // var to checkpoint
+    std::vector<int> var_to_checkpoint = {10, 20, 30};
+
+    std::shared_ptr<DataType> type (new SpecifiedSequenceDataType<std::vector<int>>("std::vector<int>"));
+    type->validate(&dataTypeInator);
+
+    AllocInfo my_alloc_info ("var_to_checkpoint", type, &var_to_checkpoint);
+
+    J_CheckpointAgent checkpoint_agent(&dataTypeInator);
+    std::stringstream ss;
+    std::vector<AllocInfo *> alloc_list;
+    alloc_list.push_back(&my_alloc_info);
+
+    // ACT
+    checkpoint_agent.writeAssignment(ss, &my_alloc_info, alloc_list);
+
+    // ASSERT
+    std::string expected =  "RESIZE_STL var_to_checkpoint.size = 3 ;\n"
+                            "var_to_checkpoint[0] = 10 ;\n"
+                            "var_to_checkpoint[1] = 20 ;\n"
+                            "var_to_checkpoint[2] = 30 ;\n";
+
+    EXPECT_EQ(expected, ss.str());
+}
+
 TEST_F (J_CheckpointAgentTest, dump_string) {    
     // ARRANGE
     // std::string str_to_checkpoint = "Ra Ra Rasputin";
@@ -161,10 +182,6 @@ TEST_F (J_CheckpointAgentTest, dump_string) {
     // ASSSERT
     std::string expected(R"(// Variable Declarations.
 std::string str_to_checkpoint ;
-
-
-// Clear all allocations to 0.
-clear_all_vars();
 
 
 // Variable Assignments.
@@ -231,10 +248,6 @@ TEST_F (J_CheckpointAgentTest, whole_format_pointers_galore) {
     std::string expected(R"(// Variable Declarations.
 
 
-// Clear all allocations to 0.
-clear_all_vars();
-
-
 // Variable Assignments.
 var_to_checkpoint.x = 100 ;
 var_to_checkpoint.y = 5.5 ;
@@ -265,9 +278,6 @@ TEST_F (J_CheckpointAgentTest, restore_basic_local) {
     std::string checkpoint_str(R"(// Variable Declarations.
 int my_int ;
 
-
-// Clear all allocations to 0.
-clear_all_vars();
 
 
 // Variable Assignments.
@@ -404,10 +414,6 @@ TEST_F (J_CheckpointAgentTest, whole_restore_pointers_galore) {
     std::string checkpoint_str(R"(// Variable Declarations.
 
 
-// Clear all allocations to 0.
-clear_all_vars();
-
-
 // Variable Assignments.
 var_to_checkpoint.x = 100 ;
 var_to_checkpoint.y = 5.5 ;
@@ -519,4 +525,28 @@ str_to_checkpoint = "Ra Ra Rasputin" ;
     // ASSSERT
     ASSERT_EQ(std::string("Ra Ra Rasputin"), str_to_checkpoint);
 
+}
+
+TEST_F (J_CheckpointAgentTest, vector_resize_cmd) {
+    // ARRANGE
+    std::string checkpoint_str =  "RESIZE_STL var_to_checkpoint.size = 3 ;\n";
+    std::stringstream ss (checkpoint_str);
+
+    // var to checkpoint
+    std::vector<int> var_to_checkpoint;
+
+    std::shared_ptr<DataType> type (new SpecifiedSequenceDataType<std::vector<int>>("std::vector<int>"));
+    type->validate(&dataTypeInator);
+
+    AllocInfo my_alloc_info ("var_to_checkpoint", type, &var_to_checkpoint);
+
+    J_CheckpointAgent checkpoint_agent(&dataTypeInator);
+    std::vector<AllocInfo *> alloc_list;
+    alloc_list.push_back(&my_alloc_info);
+
+    // ACT
+    checkpoint_agent.restore(ss, alloc_list);
+
+    // ASSERT
+    ASSERT_EQ(3, var_to_checkpoint.size());
 }

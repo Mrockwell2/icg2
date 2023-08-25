@@ -1,9 +1,7 @@
 #include "Type/EnumDictionary.hpp"
-#include "Type/SpecifiedPrimitiveDataType.hpp"
-#include "Type/CompositeDataType.hpp"
 #include "Type/NormalStructMember.hpp"
 #include "DataTypeTestSupport.hpp"
-#include "Type/Types.hpp"
+#include "Type/AllTypes.hpp"
 #include "Value/PointerValue.hpp"
 #include "Value/IntegerValue.hpp"
 #include "Value/StringValue.hpp"
@@ -34,11 +32,11 @@ namespace GetValue {
 
 TEST_F(GetValueTest, integer) {
     // ARRANGE
-    IntDataType type;
+    std::shared_ptr<DataType> type (new IntDataType);
     int var_to_get = 42;
 
     // ACT
-    Value * val = DataTypeAlgorithm::getValue(&type, &var_to_get);
+    Value * val = DataTypeAlgorithm::getValue(type, &var_to_get);
 
     // ASSERT
     IntegerValue * int_val = dynamic_cast<IntegerValue *> (val);
@@ -51,11 +49,11 @@ TEST_F(GetValueTest, integer) {
 
 TEST_F(GetValueTest, floating_point) {
     // ARRANGE
-    DoubleDataType type;
+    std::shared_ptr<DataType> type (new DoubleDataType);
     double var_to_get = 42.42;
 
     // ACT
-    Value * val = DataTypeAlgorithm::getValue(&type, &var_to_get);
+    Value * val = DataTypeAlgorithm::getValue(type, &var_to_get);
 
     // ASSERT
     FloatingPointValue * float_val = dynamic_cast<FloatingPointValue *> (val);
@@ -69,7 +67,7 @@ TEST_F(GetValueTest, floating_point) {
 TEST_F( GetValueTest , pointer ) {
 
     // ARRANGE
-    const DataType * type = dataTypeInator.resolve("double*");
+    std::shared_ptr<const DataType> type = dataTypeInator.resolve("double*");
     double * var_to_get = (double *) 0xc0ffee;
 
     // ACT
@@ -82,19 +80,19 @@ TEST_F( GetValueTest , pointer ) {
 
     // cleanup
     delete val;
-    delete type;
+
 }
 
 TEST_F(GetValueTest, string) {
 
     // ARRANGE
-    StringDataType type;
+    std::shared_ptr<DataType> type (new StringDataType);
     std::string expected_value = "I was not able to light on any map or work giving the exact locality of the Castle Dracula, as there are no maps of this country as yet to compare with our own Ordnance Survey maps; but I found that Bistritz, the post town named by Count Dracula, is a fairly well-known place.";
 
     std::string var_to_get = expected_value;
 
     // ACT
-    Value * val = DataTypeAlgorithm::getValue(&type, &var_to_get);
+    Value * val = DataTypeAlgorithm::getValue(type, &var_to_get);
 
     // ASSERT
     StringValue * str_val = dynamic_cast<StringValue *> (val);
@@ -108,7 +106,7 @@ TEST_F(GetValueTest, string) {
 TEST_F(GetValueTest, enumerated) {
     // ARRANGE
     addDayOfWeekEnumToTypeDictionary(&dataTypeInator, &enumDictionary);
-    const DataType* type = dataTypeInator.resolve("DayOfWeek");
+    std::shared_ptr<const DataType> type = dataTypeInator.resolve("DayOfWeek");
     DayOfWeek var_to_get = Friday;
 
     // ACT
@@ -121,13 +119,13 @@ TEST_F(GetValueTest, enumerated) {
 
     // cleanup
     delete val;
-    delete type;
+
 }
 
 
 TEST_F(GetValueTest, array) {
     // ARRANGE
-    const DataType * type = dataTypeInator.resolve("double[5]");
+    std::shared_ptr<const DataType> type = dataTypeInator.resolve("double[5]");
     double var_to_get[5] = {1, 2, 3, 4, 5};
 
     // ACT
@@ -135,20 +133,20 @@ TEST_F(GetValueTest, array) {
 
     // ASSERT
     ASSERT_EQ(NULL, val);
-    delete type;
+
 }
 
 class Foo {};
 
 TEST_F(GetValueTest, composite) {
     // ARRANGE
-    CompositeDataType type( "Foo", sizeof(Foo), NULL, NULL);
-    type.validate(&dataTypeInator);
+    std::shared_ptr<DataType> type (new CompositeDataType ( "Foo", sizeof(Foo), NULL, NULL));
+    type->validate(&dataTypeInator);
 
     double var_to_get[5] = {1, 2, 3, 4, 5};
 
     // ACT
-    Value * val = DataTypeAlgorithm::getValue(&type, &var_to_get);
+    Value * val = DataTypeAlgorithm::getValue(type, &var_to_get);
 
     // ASSERT
     ASSERT_EQ(NULL, val);

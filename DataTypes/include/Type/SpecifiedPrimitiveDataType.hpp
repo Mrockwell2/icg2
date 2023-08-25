@@ -28,7 +28,7 @@ public:
     /*                          VIRTUAL INTERFACE                           */
     /* ==================================================================== */
 
-    bool validate(const DataTypeInator * dataTypeInator = NULL) override { return true; }
+    bool validate(DataTypeInator * dataTypeInator = NULL) override { return true; }
 
     bool isValid() const override { return true; }
     
@@ -37,13 +37,6 @@ public:
      */
     size_t getSize() const override {
         return sizeof(T);
-    }
-
-
-    /**
-     */
-    DataType * clone () const override {
-        return new SpecifiedPrimitiveDataType<T>();
     }
 
     /**
@@ -73,8 +66,8 @@ public:
      */
     bool assignValue(void * address, Value * value) const {
 
-        NumericValue * numeric_value_p = dynamic_cast<NumericValue*>(value);
-        if (numeric_value_p) {
+        if (value->getValueType() == Value::ValueType::INTEGER || value->getValueType() == Value::ValueType::FLOATING_POINT) {
+            NumericValue * numeric_value_p = static_cast<NumericValue*>(value);
             if ( isFloatingPoint() ) {
                 *(T*)address =  numeric_value_p->getFloatingPointValue();
             } else {

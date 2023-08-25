@@ -78,7 +78,7 @@ TEST_F(MemoryManagerTest, getDataTypeOf) {
     int * val = (int *) memoryManager.declare_var("int *x[5]");    
 
     // ACT
-    const DataType * type = memoryManager.getDataTypeOf("x");
+    std::shared_ptr<const DataType> type = memoryManager.getDataTypeOf("x");
 
     // ASSERT
     std::string expected_typename = "int*[5]";

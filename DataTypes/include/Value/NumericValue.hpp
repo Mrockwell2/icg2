@@ -13,13 +13,13 @@ class NumericValue : public Value {
      Get the value of this NumericValue as a floating point value.
      @return the value as a double.
      */
-    virtual double getFloatingPointValue() = 0;
+    virtual double getFloatingPointValue() const = 0;
 
     /**
      Get the value of this IntegerValue as an integer.
      @return the value as a long long int.
      */
-    virtual long long getIntegerValue() = 0;
+    virtual long long getIntegerValue() const = 0;
 };
 
 #endif

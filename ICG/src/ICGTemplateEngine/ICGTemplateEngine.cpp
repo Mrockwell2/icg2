@@ -1,4 +1,5 @@
 #include "ICGTemplateEngine/ICGTemplateEngine.hpp"
+#include <iostream>
 
 namespace ICGTemplateEngine {
 
@@ -68,7 +69,7 @@ namespace ICGTemplateEngine {
     /*             Entry points for ICGTemplateEngine            */
     /*************************************************************/
 
-    std::string process(const Dictionary& token_dictionary, const std::vector<const recursable *>& recursable_list) {
+    std::string process(const Dictionary& token_dictionary, const ListTokenItems& recursable_list) {
         auto dictionary_it = token_dictionary.find("top");
         if (dictionary_it == token_dictionary.end()) {
             throw std::logic_error("token_dictionary must have an entry named \"top\" to begin processing.");
@@ -79,7 +80,7 @@ namespace ICGTemplateEngine {
         return process(top_level_token, token_dictionary, recursable_list);
     }
 
-    std::string process(const std::string& fmt_string, const Dictionary& token_dictionary, const std::vector<const recursable *>& recursable_list) {
+    std::string process(const std::string& fmt_string, const Dictionary& token_dictionary, const ListTokenItems& recursable_lists_dictionary) {
         std::string result_string = fmt_string;
 
         std::string token;
@@ -88,25 +89,48 @@ namespace ICGTemplateEngine {
             // If it starts with list, strip it off
             bool list_token = false;
             std::string lookup_token = token;
+            std::string list_token_name = "";
+
             if (token.rfind("list_", 0) == 0) {
+                // A list token has the structure of list_recursableName_tokenName
+
                 list_token = true;
-                lookup_token = token.substr(5, token.size()-5);
+
+                // Chop off the "list_" string
+                std::string temp_token = token.substr(5, token.size()-5);
+
+                // Pull out the name of the list to work with
+                int loc = temp_token.find("_");
+                list_token_name = temp_token.substr(0, loc);
+                lookup_token = temp_token.substr(loc+1, temp_token.size()-(loc+1));
             }
 
             auto token_lookup_val = token_dictionary.find(lookup_token);
-            if (token_lookup_val == token_dictionary.end()) { throw std::runtime_error("Got invalid token " + lookup_token + "\nResult string so far: " + result_string); }
+            if (token_lookup_val == token_dictionary.end()) { 
+                throw std::runtime_error("Got invalid token " + lookup_token + "\nResult string so far: " + result_string); 
+            }
+
             std::string token_val = token_lookup_val->second;
 
             // Recurse into the token to populate it
             if (list_token) {
                 // We'll have to go through the list of functions and concat the results together
                 std::stringstream list_result;
+
+                // Find the right list to use
+                auto lookup_result = recursable_lists_dictionary.find(list_token_name);
+                if (lookup_result == recursable_lists_dictionary.end()) {
+                    throw std::runtime_error("No list named " + list_token_name + ".\nResult string so far: " + result_string); 
+                }
+
+                auto recursable_list = lookup_result->second;
+
                 for (const recursable * next_level_obj : recursable_list) {
                     Dictionary next_dictionary = token_dictionary;
                     Dictionary obj_dictionary = next_level_obj->toDictionary();
                 
                     next_dictionary.insert(obj_dictionary.begin(), obj_dictionary.end());
-                    std::vector<const recursable *> next_recursable = next_level_obj->nextLevel();
+                    ListTokenItems next_recursable = next_level_obj->nextLevel();
                     
                     list_result << process(token_val, next_dictionary, next_recursable);
                 }
@@ -114,7 +138,7 @@ namespace ICGTemplateEngine {
                 token_val = list_result.str();
 
             } else {
-                token_val = process(token_val, token_dictionary, recursable_list);
+                token_val = process(token_val, token_dictionary, recursable_lists_dictionary);
             }
 
             result_string = replace_token(result_string, token, token_val);

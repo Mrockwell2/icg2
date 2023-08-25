@@ -17,11 +17,6 @@ public:
                         std::string typeSpecName );
 
     /**
-     Clone.
-     */
-    NormalStructMember * clone () const;
-
-    /**
      */
     int getOffset() const;
     

@@ -540,17 +540,17 @@ TEST_F(SpecifiedPrimitiveDataTypeTest, deleteInstance) {
     
 }
 
-TEST_F(SpecifiedPrimitiveDataTypeTest, clone) {
-    // ARRANGE
-    SpecifiedPrimitiveDataType<char> * primTypeSpec = new SpecifiedPrimitiveDataType<char>();
+// TEST_F(SpecifiedPrimitiveDataTypeTest, clone) {
+//     // ARRANGE
+//     SpecifiedPrimitiveDataType<char> * primTypeSpec = new SpecifiedPrimitiveDataType<char>();
 
-    // ACT
-    DataType * cloned_type = primTypeSpec->clone();
+//     // ACT
+//     DataType * cloned_type = primTypeSpec->clone();
 
-    // ASSERT
-    ASSERT_TRUE(cloned_type != primTypeSpec);    
-    ASSERT_EQ(cloned_type->toString(), primTypeSpec->toString());    
-}
+//     // ASSERT
+//     ASSERT_TRUE(cloned_type != primTypeSpec);    
+//     ASSERT_EQ(cloned_type->toString(), primTypeSpec->toString());    
+// }
 
 // -----------------------------------------------------------------------------------------
 //                                  GetValue Tests

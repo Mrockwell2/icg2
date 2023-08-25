@@ -1,13 +1,14 @@
 #pragma once
 
 #include <string>
+#include <iostream>
 
 #include "Algorithm/DataTypeVisitor.hpp"
 
 class DataTypeInator;
 
 /** @brief Abstract base class for DataTypes. */
-class DataType {
+class DataType : public std::enable_shared_from_this<DataType> {
 
     public:
 
@@ -21,7 +22,7 @@ class DataType {
     * @param dataTypeInator - type resolver machine
     * @return true if successful, false otherwise
     */
-    virtual bool validate(const DataTypeInator* dataTypeInator) = 0;
+    virtual bool validate(DataTypeInator* dataTypeInator) = 0;
 
     /**
      * @brief Determine whether this type has already been successfully validated.
@@ -43,13 +44,6 @@ class DataType {
      * @return std::string name of the type
      */
     virtual std::string getTypeSpecName() const = 0;
-
-    /**
-     * @brief Deep copy of this type
-     * 
-     * @return DataType* a deep copy of this type
-     */
-    virtual DataType * clone () const = 0;
 
     /**
      * @brief Create one or more instances of this type

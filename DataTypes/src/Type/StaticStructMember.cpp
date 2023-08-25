@@ -11,9 +11,9 @@ StaticStructMember::StaticStructMember(std::string memberName,void * memberAddre
                                     :  StructMember(memberName, typeSpecName), memberAddress(memberAddress) {}
 
 
-StaticStructMember * StaticStructMember::clone () const {
-    return new StaticStructMember( *this );
-}
+// StaticStructMember * StaticStructMember::clone () const {
+//     return new StaticStructMember( *this );
+// }
 
 void * StaticStructMember::getAddress() const {
     return memberAddress;

@@ -18,7 +18,7 @@
  A CompositeDataType represents user-defined types, such as structs, unions, or classes.
  It is 'composed' of ordered lists of component types.
  */
-class CompositeDataType : public BaseType {
+class CompositeDataType : public DataType {
 
 public:
 
@@ -35,23 +35,18 @@ public:
     /*                         RULE OF THREE (and a half) INTERFACE                      */
     /* ================================================================================= */
 
-    CompositeDataType ( const CompositeDataType & original );
+    CompositeDataType ( const CompositeDataType & original ) = delete;
     ~CompositeDataType ();
-    CompositeDataType & operator=( CompositeDataType rhs ) ;
-
-    friend void swap (CompositeDataType& a, CompositeDataType& b) ;
+    CompositeDataType & operator=( CompositeDataType rhs ) = delete;
 
     /* ==================================================================== */
     /*                          VIRTUAL INTERFACE                         */
     /* ==================================================================== */
 
-    /**
-     */
-    DataType * clone() const override;
 
     /**
      */
-    bool validate(const DataTypeInator* dataTypeInator) override;
+    bool validate(DataTypeInator* dataTypeInator) override;
 
     bool isValid() const override;
 

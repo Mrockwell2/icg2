@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Type/BaseType.hpp"
+#include "Type/DataType.hpp"
 #include "Value/IntegerValue.hpp"
 #include "Value/FloatingPointValue.hpp"
 
@@ -9,7 +9,7 @@
 
 /**
  */
-class PrimitiveDataType : public BaseType {
+class PrimitiveDataType : public DataType {
 
 public:
 
@@ -26,7 +26,7 @@ public:
     // Most of the DataTypeInterface is abstract here, will be defined by SpecifiedPrimitiveType
 
     bool accept (DataTypeVisitor* visitor) const override {
-        return visitor->visitPrimitiveDataType(this);
+        return visitor->visitPrimitiveDataType(std::static_pointer_cast<const PrimitiveDataType>(shared_from_this()));
     }
 
 

@@ -3,7 +3,7 @@
 #include <vector>
 #include <stdexcept>
 
-#include "Type/BaseType.hpp"
+#include "Type/DataType.hpp"
 
 #include "Enumerator.hpp"
 #include "Type/EnumDictionary.hpp"
@@ -15,7 +15,7 @@
  * @note since the underlying type can vary in size, it would possibly be cleaner to implement this in a similar way to the Primitive/SpecifiedPrimititive<T>
  * hierarchy. However, I think since there are only 3 possible sizes, maybe this is ok.
  */
-class EnumDataType : public BaseType {
+class EnumDataType : public DataType {
 
 public:
 
@@ -34,23 +34,18 @@ public:
     /*                         RULE OF THREE (and a half) INTERFACE                      */
     /* ================================================================================= */
 
-    EnumDataType ( const EnumDataType & original );
+    EnumDataType ( const EnumDataType & original ) = delete;
     ~EnumDataType ();
-    EnumDataType & operator=( EnumDataType rhs ) ;
-
-    friend void swap (EnumDataType& a, EnumDataType& b) ;
+    EnumDataType & operator=( EnumDataType rhs ) = delete;
 
     /* ==================================================================== */
     /*                          VIRTUAL INTERFACE                         */
     /* ==================================================================== */
 
-    /**
-     */
-    DataType * clone() const override;
 
     /**
      */
-    bool validate(const DataTypeInator* dataTypeInator = NULL) override;
+    bool validate(DataTypeInator* dataTypeInator = NULL) override;
 
     bool isValid() const override;
 

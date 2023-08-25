@@ -11,11 +11,11 @@ StringDataType::StringDataType() {}
 /*                           VIRTUAL INTERFACE                          */
 /* ==================================================================== */
 
-DataType * StringDataType::clone () const {
-    return new StringDataType( *this );
-}
+// DataType * StringDataType::clone () const {
+//     return new StringDataType( *this );
+// }
 
-bool StringDataType::validate(const DataTypeInator * dataTypeInator) {
+bool StringDataType::validate(DataTypeInator * dataTypeInator) {
     return true;
 }
 
@@ -42,6 +42,6 @@ std::string StringDataType::getTypeSpecName() const {
 }
 
 bool StringDataType::accept (DataTypeVisitor* visitor) const {
-    return visitor->visitStringType(this);
+    return visitor->visitStringType(std::static_pointer_cast<const StringDataType>(shared_from_this()));
 }
 

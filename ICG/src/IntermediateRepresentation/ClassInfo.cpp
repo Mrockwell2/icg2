@@ -10,28 +10,70 @@ ClassInfo::ClassInfo(std::string n) : name(n) {}
 
 ICGTemplateEngine::Dictionary ClassInfo::toDictionary() const {
     ICGTemplateEngine::Dictionary dictionary;
-    
-    dictionary["ClassName"] = name;
-    dictionary["ClassName_mangled"] = ICGUtils::makeVarname(name);
+
+    std::stringstream fullname;
+    fullname << name;
+    if (template_args.size() != 0) {
+        fullname << "<";
+        for (int i = 0; i < template_args.size(); i++) {
+            if (i != 0) {
+                fullname << ", ";
+            }
+            fullname << template_args[i];
+        }
+        fullname << ">";
+    }
+
+    dictionary["ClassName"] = fullname.str();
+    dictionary["ClassName_mangled"] = ICGUtils::makeVarname(fullname.str());
 
     return dictionary;
 }
 
 // Push the fields
-std::vector<const ICGTemplateEngine::recursable *> ClassInfo::nextLevel() const {
-    std::vector<const ICGTemplateEngine::recursable *> my_fields;
+ICGTemplateEngine::ListTokenItems ClassInfo::nextLevel() const {
+    ICGTemplateEngine::ListTokenItems my_fields_dictionary;
+    std::string field_key = "fields";
+
     for (const auto& field : fields) {
-        my_fields.push_back(&field);
+        my_fields_dictionary[field_key].push_back(&field);
     }
-    return my_fields;
+    return my_fields_dictionary;
 }
 
-// std::ostream& operator<< (std::ostream& stream, const ClassInfo& class_info) {
-//     stream << class_info.name;
-//     stream << "\n{\n";
-//     for (const auto& field : class_info.fields) {
-//         stream << field;
-//     }
-//     stream << "\n}" << std::endl;
-//     return stream;
-// }
+std::string ClassInfo::toString () const {
+    std::stringstream fullname;
+    fullname << name;
+    if (template_args.size() != 0) {
+        fullname << "<";
+        for (int i = 0; i < template_args.size(); i++) {
+            if (i != 0) {
+                fullname << ", ";
+            }
+            fullname << template_args[i];
+        }
+        fullname << ">";
+    }
+
+    std::string ret = "class " + fullname.str() + " {\n";
+    for (auto field : fields) {
+        ret += "\t" + field.toString() + "\n";
+    }
+
+    ret += "};\n";
+    return ret;
+}
+
+std::unordered_set<std::string> ClassInfo::getStlMembers() const {
+
+    std::unordered_set<std::string> ret;
+
+    for (auto field : fields) {
+        // Did we find an stl type?
+        if (ICGUtils::isStlContainer(field.type)) {
+            ret.insert(field.type);
+        }
+    }
+
+    return ret;
+}

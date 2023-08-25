@@ -53,7 +53,7 @@ TEST (ParsedAssignmentTest, parse_string) {
 
     StringValue * str_value = dynamic_cast<StringValue *> (value);
     ASSERT_TRUE(str_value != NULL);
-    EXPECT_EQ("\"this is my string literal value\"", str_value->toString());
+    EXPECT_EQ("this is my string literal value", str_value->toString());
 }
 
 TEST (ParsedAssignmentTest, parse_pointer_val) {

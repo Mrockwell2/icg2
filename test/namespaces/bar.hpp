@@ -10,8 +10,6 @@ class Bar {
 public:
     jackie::Foo j_foo;
     Foo foo;
-
-    // Foo::Bar foobar;
 };
 
 namespace jackie {

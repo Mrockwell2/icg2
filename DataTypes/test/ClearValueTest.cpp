@@ -1,9 +1,7 @@
 #include "Type/EnumDictionary.hpp"
-#include "Type/SpecifiedPrimitiveDataType.hpp"
-#include "Type/CompositeDataType.hpp"
 #include "Type/NormalStructMember.hpp"
 #include "DataTypeTestSupport.hpp"
-#include "Type/Types.hpp"
+#include "Type/AllTypes.hpp"
 #include "Value/PointerValue.hpp"
 #include "Value/IntegerValue.hpp"
 #include "Value/StringValue.hpp"
@@ -34,11 +32,11 @@ namespace ClearValue {
 
 TEST_F(ClearValueTest, integer) {
     // ARRANGE
-    IntDataType type;
+    std::shared_ptr<DataType> type (new IntDataType);
     int var_to_clear = 42;
 
     // ACT
-    DataTypeAlgorithm::clearValue(&type,   &var_to_clear);
+    DataTypeAlgorithm::clearValue(type,   &var_to_clear);
 
     // ASSERT
     ASSERT_EQ(0, var_to_clear);
@@ -46,11 +44,11 @@ TEST_F(ClearValueTest, integer) {
 
 TEST_F(ClearValueTest, floating_point) {
     // ARRANGE
-    DoubleDataType type;
+    std::shared_ptr<DataType> type (new DoubleDataType);
     double var_to_clear = -42.42;
 
     // ACT
-    DataTypeAlgorithm::clearValue(&type,   &var_to_clear);
+    DataTypeAlgorithm::clearValue(type,   &var_to_clear);
 
     // ASSERT
     ASSERT_EQ(0, var_to_clear);
@@ -59,7 +57,7 @@ TEST_F(ClearValueTest, floating_point) {
 
 TEST_F( ClearValueTest , pointer ) {
     // ARRANGE
-    const DataType * type = dataTypeInator.resolve("double*");
+    std::shared_ptr<const DataType> type = dataTypeInator.resolve("double*");
     double * var_to_clear = (double *) 0xc0ffee;
 
     // ACT
@@ -68,20 +66,19 @@ TEST_F( ClearValueTest , pointer ) {
     // ASSERT
     ASSERT_EQ(NULL, var_to_clear);
 
-    // cleanup
-    delete type;
+
 }
 
 
 TEST_F(ClearValueTest, string) {
     // ARRANGE
     std::string expected_value = "I was not able to light on any map or work giving the exact locality of the Castle Dracula, as there are no maps of this country as yet to compare with our own Ordnance Survey maps; but I found that Bistritz, the post town named by Count Dracula, is a fairly well-known place.";
-    StringDataType type;
+    std::shared_ptr<DataType> type (new StringDataType);
 
     std::string var_to_clear = expected_value;
 
     // ACT
-    DataTypeAlgorithm::clearValue(&type,  &var_to_clear);
+    DataTypeAlgorithm::clearValue(type,  &var_to_clear);
 
     // ASSERT
     ASSERT_EQ(std::string(""), var_to_clear);
@@ -91,7 +88,7 @@ TEST_F(ClearValueTest, string) {
 TEST_F(ClearValueTest, enumerated) {
     // ARRANGE
     addDayOfWeekEnumToTypeDictionary( &dataTypeInator, &enumDictionary);
-    const DataType* type = dataTypeInator.resolve("DayOfWeek");
+    std::shared_ptr<const DataType> type = dataTypeInator.resolve("DayOfWeek");
     DayOfWeek var_to_clear = Friday;
 
     // ACT
@@ -100,13 +97,12 @@ TEST_F(ClearValueTest, enumerated) {
     // ASSERT
     ASSERT_EQ(DayOfWeek(0), var_to_clear);
 
-    // cleanup
-    delete type;
+
 }
 
 TEST_F(ClearValueTest, array) {
     // ARRANGE
-    const DataType * type = dataTypeInator.resolve("double[5]");
+    std::shared_ptr<const DataType> type = dataTypeInator.resolve("double[5]");
     double var_to_clear[5] = {1, 2, 3, 4, 5};
 
     // ACT
@@ -118,7 +114,7 @@ TEST_F(ClearValueTest, array) {
     }
 
 
-    delete type;
+
 }
 
 class Foo { 
@@ -129,10 +125,10 @@ class Foo {
 
 TEST_F(ClearValueTest, composite) {
     // ARRANGE
-    CompositeDataType type( "Foo", sizeof(Foo), NULL, NULL);
-    type.addRegularMember("x", offsetof(Foo, x), "int");
-    type.addRegularMember("y", offsetof(Foo, y), "double[5]");
-    type.validate(&dataTypeInator);
+    std::shared_ptr<CompositeDataType> type (new CompositeDataType ( "Foo", sizeof(Foo), NULL, NULL));
+    type->addRegularMember("x", offsetof(Foo, x), "int");
+    type->addRegularMember("y", offsetof(Foo, y), "double[5]");
+    type->validate(&dataTypeInator);
 
     Foo var_to_clear;
     var_to_clear.x = 5;
@@ -141,13 +137,28 @@ TEST_F(ClearValueTest, composite) {
     }
 
     // ACT
-    DataTypeAlgorithm::clearValue(&type,   &var_to_clear);
+    DataTypeAlgorithm::clearValue(type,   &var_to_clear);
 
     // ASSERT
     ASSERT_EQ(0, var_to_clear.x);
     for (int i = 0; i < 5; i++) {
         ASSERT_EQ(0, var_to_clear.y[i]);
     }
+}
+
+TEST_F(ClearValueTest, vector) {
+    // ARRANGE
+    std::shared_ptr<DataType> type (new SpecifiedSequenceDataType<std::vector<int>> ( "std::vector<int>"));
+    type->validate(&dataTypeInator);
+
+    std::vector<int> var_to_clear({1, 2, 3});
+    
+
+    // ACT
+    DataTypeAlgorithm::clearValue(type, &var_to_clear);
+
+    // ASSERT
+    ASSERT_EQ(0, var_to_clear.size());
 }
 
 

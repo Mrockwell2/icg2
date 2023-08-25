@@ -39,13 +39,13 @@ public:
      */
     virtual bool validate() override;
 
-    const DataType * getDataType() const;
+    std::shared_ptr<const DataType> getDataType() const;
 
     virtual void * getAddress(void * struct_address) const = 0;
 
 protected:
     std::string typeSpecName;
-    const DataType * subType;
+    std::shared_ptr<const DataType> subType;
     DataTypeInator* dataTypeInator;
     bool isValid;
 };

@@ -15,33 +15,25 @@
 PointerDataType::PointerDataType( std::string typeSpecifierName) : typeSpecName(typeSpecifierName) {}
 
 // COPY CONSTRUCTOR
-PointerDataType::PointerDataType ( PointerDataType const & original) {
+// PointerDataType::PointerDataType ( PointerDataType const & original) {
 
-    is_valid = original.is_valid;
-    typeSpecName = original.typeSpecName;
+//     is_valid = original.is_valid;
+//     typeSpecName = original.typeSpecName;
 
-    if (original.subType == NULL) {
-        subType = NULL;
-    } else {
-        subType = original.subType->clone();
-    }
-}
+//     subType = original.subType;
+  
+// }
 
 // DESTRUCTOR
-PointerDataType::~PointerDataType () {
-
-    if ( typeSpecName.empty()) {
-        delete subType;
-    }
-}
+PointerDataType::~PointerDataType () {}
 
 // CLONE
-DataType * PointerDataType::clone () const {
-    return new PointerDataType( *this );
-}
+// DataType * PointerDataType::clone () const {
+//     return new PointerDataType( *this );
+// }
 
 // MEMBER FUNCTION
-bool PointerDataType::validate(const DataTypeInator * dataTypeInator) {
+bool PointerDataType::validate(DataTypeInator * dataTypeInator) {
 
     if (!is_valid) {
         subType = dataTypeInator->resolve( typeSpecName );
@@ -92,5 +84,9 @@ std::string PointerDataType::makeDeclaration(std::string declarator) const {
 }
 
 bool PointerDataType::accept (DataTypeVisitor * visitor) const {
-    return visitor->visitPointerType(this);
+    return visitor->visitPointerType(std::static_pointer_cast<const PointerDataType>(shared_from_this()));
+}
+
+std::shared_ptr<const DataType> PointerDataType::getSubType() const {
+    return subType;
 }

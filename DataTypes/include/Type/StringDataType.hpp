@@ -4,12 +4,12 @@
 #include <string>
 #include <stdexcept>
 
-#include "Type/BaseType.hpp"
+#include "Type/DataType.hpp"
 
 
 /**
  */
-class StringDataType : public BaseType {
+class StringDataType : public DataType {
 
     public:
 
@@ -22,9 +22,9 @@ class StringDataType : public BaseType {
     /*                         RULE OF THREE (and a half) INTERFACE                      */
     /* ================================================================================= */
 
-    StringDataType ( const StringDataType & original ) = default;
+    StringDataType ( const StringDataType & original ) = delete;
     ~StringDataType () = default;
-    StringDataType& operator=( const StringDataType & rhs ) = default;
+    StringDataType& operator=( const StringDataType & rhs ) = delete;
 
     /* ==================================================================== */
     /*                          VIRTUAL INTERFACE                         */
@@ -36,7 +36,7 @@ class StringDataType : public BaseType {
      * @param dataTypeInator unused parameter, defaults to null
      * @return true always
      */
-    bool validate(const DataTypeInator * dataTypeInator = NULL) override;
+    bool validate(DataTypeInator * dataTypeInator = NULL) override;
 
     bool isValid() const override;
 
@@ -46,9 +46,6 @@ class StringDataType : public BaseType {
      */
     size_t getSize() const override;
 
-    /**
-     */
-    DataType * clone () const override;
 
     /**
      Create zero or more instances of this DataType.

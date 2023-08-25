@@ -1,11 +1,7 @@
 #pragma once
 
-#include <clang-c/Index.h>  // This is libclang.
 #include <iostream>
 #include <string>
-
-enum StorageClass {LOCAL, STATIC};
-enum AccessLevel  {INVALID, PUBLIC, PROTECTED, PRIVATE, NONE};
 
 namespace ICGUtils {
 
@@ -21,17 +17,19 @@ namespace ICGUtils {
      */
     std::string makeVarname(const std::string& typename_to_modify);
 
-    std::string toStdString(const CXString& str);
-
-    std::ostream& operator<<(std::ostream& stream, const CXString& str);
-
-    std::string getCursorSpelling (CXCursor c);
-
-    std::string getTypeSpelling (CXCursor c);
-
-    std::string getKindSpelling (CXCursor c);
-
-    enum AccessLevel getAccessLevel (CXCursor c);
-
+    /**
+     * @brief Make the name of the output header file. For now, this is just io_<header_name>
+     * 
+     * @param header_name input header name
+     * @return std::string output header name
+     */
     std::string makeIOHeaderName (std::string header_name);
+
+    /**
+     * @brief Is the typename an STL container?
+     * 
+     * @param some_typename name of a type 
+     * @return true if it is, false otherwise
+     */
+    bool isStlContainer (std::string some_typename);
 }

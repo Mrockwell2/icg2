@@ -2,6 +2,7 @@
 
 #include <map>
 #include <vector>
+#include <unordered_set>
 
 #include "utils.hpp"
 #include "ICGTemplateEngine/ICGTemplateEngine.hpp"
@@ -20,9 +21,12 @@ public:
 
     std::string name;
     std::vector<FieldInfo> fields;
+    std::vector<std::string> template_args;
 
     ICGTemplateEngine::Dictionary toDictionary() const override;
-    std::vector<const ICGTemplateEngine::recursable *> nextLevel() const override;
+    ICGTemplateEngine::ListTokenItems nextLevel() const override;
 
-    // friend std::ostream& operator<< (std::ostream& stream, const ClassInfo& str);
+    std::unordered_set<std::string> getStlMembers() const;
+
+    std::string toString() const override;
 };

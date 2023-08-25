@@ -3,9 +3,12 @@
 #include <map>
 #include <string>
 #include <stdexcept>
-#include <deque>
-#include "Type/BaseType.hpp"
-#include "DataTypeInator.hpp"
+#include <memory>
+
+#include "Type/DataType.hpp"
+#include "Utils/MutableDeclaration.hpp"
+
+class DataTypeInator;
 
 /**
  Stores name / typespecifier pairs.
@@ -17,19 +20,19 @@ class TypeDictionary {
     TypeDictionary();
 
     /**
-     Get the BaseType of the for the typedef'ed name.
+     Get the DataType of the for the typedef'ed name.
      */
-    const BaseType* lookup(std::string typeName);
+    std::shared_ptr<const DataType> lookup(std::string typeName);
 
     /**
      Add a type definiton to the dictionary.
      */
-    void addTypeDefinition(std::string name, BaseType * typeSpec);
+    void addTypeDefinition(std::string name, DataType * typeSpec);
 
 
     /**
      */
-    bool validate(const DataTypeInator * dataTypeInator);
+    bool validate(DataTypeInator * dataTypeInator);
 
     /**
      Dump the entire TypeDictionary to a std::string.
@@ -48,12 +51,13 @@ class TypeDictionary {
     private:
     bool is_valid;
 
-    std::map<std::string, BaseType*> typeDictionary;
+    std::map<std::string, std::shared_ptr<DataType>> typeDictionary;
+    
+    // Make these guys unique_ptrs
+    // Or just objects? No reason to make this a pointer i think
     std::map<std::string, TypeDictionary *> namespaceDictionary;
 
     // Helpers to avoid having to parse the declaration multiple times
-    void addTypeDefinition(std::deque<std::string> nameParts, BaseType * typeSpec);
-    const BaseType* lookup(std::deque<std::string> nameParts);
-
-
+    void addTypeDefinition(MutableDeclaration& nameParts, DataType * typeSpec);
+    std::shared_ptr<const DataType> lookup(MutableDeclaration& nameParts);
 };

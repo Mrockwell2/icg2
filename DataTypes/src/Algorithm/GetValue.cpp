@@ -1,6 +1,6 @@
 #include "Algorithm/GetValue.hpp"
 
-#include "Type/Types.hpp"
+#include "Type/VisitableTypes.hpp"
 #include "Type/NormalStructMember.hpp"
 #include "Value/Value.hpp"
 #include "Value/IntegerValue.hpp"
@@ -27,7 +27,7 @@ namespace GetValue {
 
     GetValueVisitor::GetValueVisitor(void * address) : address(address), result(NULL) {}
 
-    bool GetValueVisitor::visitPrimitiveDataType(const PrimitiveDataType * node) {
+    bool GetValueVisitor::visitPrimitiveDataType(std::shared_ptr<const PrimitiveDataType> node) {
         // Primitives are actually an abstract base for the SpecifiedPrimitive<T>  type
         // So we use the GetValue() interface from PrimitiveType
 
@@ -35,29 +35,34 @@ namespace GetValue {
         return true;
     }
 
-    bool GetValueVisitor::visitStringType(const StringDataType * node) {
+    bool GetValueVisitor::visitStringType(std::shared_ptr<const StringDataType> node) {
         result = new StringValue(* (std::string * ) address);
         return true;
     }
 
-    bool GetValueVisitor::visitCompositeType(const CompositeDataType * node) {
+    bool GetValueVisitor::visitCompositeType(std::shared_ptr<const CompositeDataType> node) {
         std::cerr << "Must get a leaf type" << std::endl;
         return false;
     }
 
-    bool GetValueVisitor::visitArrayType(const ArrayDataType * node) {
+    bool GetValueVisitor::visitArrayType(std::shared_ptr<const ArrayDataType> node) {
         std::cerr << "Must get a leaf type" << std::endl;
         return false;
     }
 
-    bool GetValueVisitor::visitPointerType(const PointerDataType * node) {
+    bool GetValueVisitor::visitPointerType(std::shared_ptr<const PointerDataType> node) {
         result = new PointerValue(*(void**)address);
         return true;
     }
 
-    bool GetValueVisitor::visitEnumeratedType(const EnumDataType * node) {
+    bool GetValueVisitor::visitEnumeratedType(std::shared_ptr<const EnumDataType> node) {
         result = new IntegerValue(node->getValue(address));
         return true;
+    }
+
+    bool GetValueVisitor::visitSequenceType (std::shared_ptr<const SequenceDataType>  node) {
+        std::cerr << "Must get a leaf type" << std::endl;
+        return false;    
     }
 
     Result GetValueVisitor::getResult () {

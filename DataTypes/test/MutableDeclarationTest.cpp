@@ -334,3 +334,54 @@ TEST(MutableDeclaration, invalid_dims) {
     std::string expected = "";
     EXPECT_EQ(result, expected);
 }
+
+TEST(MutableDeclaration, qualified_name) {
+    // ARRANGE
+    MutableDeclaration builder ("MyNamespace::MyClass a[5]");
+
+    // ACT
+    std::string result = builder.getTypeSpecifier();
+
+    // ASSERT
+    std::string expected = "MyNamespace::MyClass";
+    EXPECT_EQ(result, expected);
+}
+
+TEST(MutableDeclaration, qualified_name_abstract_declarator) {
+    // ARRANGE
+    MutableDeclaration builder ("MyNamespace::MyClass a[5]");
+
+    // ACT
+    std::string result = builder.getAbstractDeclarator();
+
+    // ASSERT
+    std::string expected = "MyNamespace::MyClass[5]";
+    EXPECT_EQ(result, expected);
+}
+
+
+TEST(MutableDeclaration, push_qualifier) {
+    // ARRANGE
+    MutableDeclaration builder ("MyClass a[5]");
+
+    // ACT
+    builder.pushQualifier("MyNamespace");
+
+    // ASSERT
+    std::string result = builder.getAbstractDeclarator();
+    std::string expected = "MyNamespace::MyClass[5]";
+    EXPECT_EQ(result, expected);
+}
+
+TEST(MutableDeclaration, pop_qualifier) {
+    // ARRANGE
+    MutableDeclaration builder ("MyNamespace::MyClass a[5]");
+
+    // ACT
+    builder.popQualifier();
+
+    // ASSERT
+    std::string result = builder.getAbstractDeclarator();
+    std::string expected = "MyClass[5]";
+    EXPECT_EQ(result, expected);
+}

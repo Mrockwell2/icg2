@@ -5,18 +5,16 @@
 #include <stdexcept>
 
 #include "DataTypeInator.hpp"
-#include "Type/ModifierType.hpp"
 
 
 /**
  */
-class PointerDataType : public ModifierType {
+class PointerDataType : public DataType {
 
     public:
 
     /**
      Constructor for ArrayDataType.
-     @param dataTypeInator The Type resolver machine
      @param typeSpecifierName Name of the type on with this type is based.
      */
     PointerDataType( std::string typeSpecifierName ) ;
@@ -25,11 +23,10 @@ class PointerDataType : public ModifierType {
     /*                         RULE OF THREE (and a half) INTERFACE                      */
     /* ================================================================================= */
 
-    PointerDataType ( const PointerDataType & original );
+    PointerDataType ( const PointerDataType & original ) = delete;
     ~PointerDataType ();
-    PointerDataType & operator=( PointerDataType rhs ) ;
+    PointerDataType & operator=( PointerDataType rhs ) = delete;
 
-    friend void swap (PointerDataType& a, PointerDataType& b) ;
 
     /* ==================================================================== */
     /*                          VIRTUAL INTERFACE                         */
@@ -37,7 +34,7 @@ class PointerDataType : public ModifierType {
 
     /**
      */
-    bool validate(const DataTypeInator * dataTypeInator) override;
+    bool validate(DataTypeInator * dataTypeInator) override;
 
     bool isValid() const override;
 
@@ -47,9 +44,6 @@ class PointerDataType : public ModifierType {
      */
     size_t getSize() const override;
 
-    /**
-     */
-    DataType * clone () const override;
 
     /**
      Create zero or more instances of this DataType.
@@ -71,8 +65,16 @@ class PointerDataType : public ModifierType {
     bool accept (DataTypeVisitor* visitor) const override;
 
 
+    /* ==================================================================== */
+    /*                       CLASS SPECIFIC INTERFACE                       */
+    /* ==================================================================== */
+
+    std::shared_ptr<const DataType> getSubType() const;
+
+
     private:
-    PointerDataType(){}
+
+    std::shared_ptr<const DataType> subType;
 
     bool             is_valid;
     std::string      typeSpecName;

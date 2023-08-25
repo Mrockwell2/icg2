@@ -1,7 +1,7 @@
 #include <sstream>
 #include <string.h> // for memcpy
 
-#include "Type/Types.hpp"
+#include "Type/VisitableTypes.hpp"
 #include "MemoryManagement/AllocInfo.hpp"
 #include "Utils/MutableDeclaration.hpp"
 #include "Algorithm/DataTypeAlgorithm.hpp"
@@ -14,7 +14,7 @@ unsigned int AllocInfo::nextSerialNumber = 0;
 
 // PRIVATE MEMBER FUNCTION
 void AllocInfo::initialize( const std::string& varName,
-                            const DataType*    type,
+                            std::shared_ptr<const DataType>    type,
                             void*              suppliedAllocation)  {
 
     // Because they can be resized, all allocations are really arrays,
@@ -40,7 +40,7 @@ void AllocInfo::initialize( const std::string& varName,
 
 // CONSTRUCTOR
 AllocInfo::AllocInfo( const std::string& varName,
-                      const DataType*    type,
+                      std::shared_ptr<const DataType>    type,
                       void*              suppliedAllocation)  {
 
     initialize(varName, type, suppliedAllocation);
@@ -90,7 +90,7 @@ std::string AllocInfo::getTypeSpecifierName() const {
 }
 
 // PUBLIC MEMBER FUNCTION
-const DataType * AllocInfo::getDataType() const {
+std::shared_ptr<const DataType> AllocInfo::getDataType() const {
     return dataType;
 }
 

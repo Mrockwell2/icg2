@@ -15,7 +15,7 @@ class ContainsPointerVisitorTest : public ::testing::Test {
 
 TEST_F(ContainsPointerVisitorTest, primitive) {
     // ARRANGE
-    DataType * type = new DoubleDataType();
+    std::shared_ptr<DataType> type( new DoubleDataType());
 
     // ACT
     bool result = DataTypeAlgorithm::containsPointer(type);
@@ -24,12 +24,12 @@ TEST_F(ContainsPointerVisitorTest, primitive) {
     ASSERT_EQ(false, result);
 
     
-    delete type;
+
 }
 
 TEST_F(ContainsPointerVisitorTest, array) {
     // ARRANGE
-    const DataType * type = dataTypeInator.resolve("double[5]");
+    std::shared_ptr<const DataType> type = dataTypeInator.resolve("double[5]");
 
     // ACT
     bool result = DataTypeAlgorithm::containsPointer(type);
@@ -37,12 +37,12 @@ TEST_F(ContainsPointerVisitorTest, array) {
     // ASSERT
     ASSERT_EQ(false, result);
 
-    delete type;
+
 }
 
 TEST_F(ContainsPointerVisitorTest, multidim_array) {
     // ARRANGE
-    const DataType * type = dataTypeInator.resolve("long[5][4][2][1]");
+    std::shared_ptr<const DataType> type = dataTypeInator.resolve("long[5][4][2][1]");
 
     // ACT
     bool result = DataTypeAlgorithm::containsPointer(type);
@@ -50,12 +50,12 @@ TEST_F(ContainsPointerVisitorTest, multidim_array) {
     // ASSERT
     ASSERT_EQ(false, result);
 
-    delete type;
+
 }
 
 TEST_F(ContainsPointerVisitorTest, string) {
     // ARRANGE
-    const DataType * type = dataTypeInator.resolve("std::string");
+    std::shared_ptr<const DataType> type = dataTypeInator.resolve("std::string");
 
     // ACT
     bool result = DataTypeAlgorithm::containsPointer(type);
@@ -63,12 +63,12 @@ TEST_F(ContainsPointerVisitorTest, string) {
     // ASSERT
     ASSERT_EQ(false, result);
 
-    delete type;
+
 }
 
 TEST_F(ContainsPointerVisitorTest, bare_pointer) {
     // ARRANGE
-    const DataType * type = dataTypeInator.resolve("int *");
+    std::shared_ptr<const DataType> type = dataTypeInator.resolve("int *");
 
     // ACT
     bool result = DataTypeAlgorithm::containsPointer(type);
@@ -76,12 +76,12 @@ TEST_F(ContainsPointerVisitorTest, bare_pointer) {
     // ASSERT
     ASSERT_EQ(true, result);
 
-    delete type;
+
 }
 
 TEST_F(ContainsPointerVisitorTest, void_pointer) {
     // ARRANGE
-    const DataType * type = dataTypeInator.resolve("void *");
+    std::shared_ptr<const DataType> type = dataTypeInator.resolve("void *");
 
     // ACT
     bool result = DataTypeAlgorithm::containsPointer(type);
@@ -89,12 +89,12 @@ TEST_F(ContainsPointerVisitorTest, void_pointer) {
     // ASSERT
     ASSERT_EQ(true, result);
 
-    delete type;
+
 }
 
 TEST_F(ContainsPointerVisitorTest, array_of_pointers) {
     // ARRANGE
-    const DataType * type = dataTypeInator.resolve("int *[6]");
+    std::shared_ptr<const DataType> type = dataTypeInator.resolve("int *[6]");
 
     // ACT
     bool result = DataTypeAlgorithm::containsPointer(type);
@@ -102,12 +102,12 @@ TEST_F(ContainsPointerVisitorTest, array_of_pointers) {
     // ASSERT
     ASSERT_EQ(true, result);
 
-    delete type;
+
 }
 
 TEST_F(ContainsPointerVisitorTest, pointer_to_array) {
     // ARRANGE
-    const DataType * type = dataTypeInator.resolve("int (*)[6]");
+    std::shared_ptr<const DataType> type = dataTypeInator.resolve("int (*)[6]");
 
     // ACT
     bool result = DataTypeAlgorithm::containsPointer(type);
@@ -115,13 +115,13 @@ TEST_F(ContainsPointerVisitorTest, pointer_to_array) {
     // ASSERT
     ASSERT_EQ(true, result);
 
-    delete type;
+
 }
 
 TEST_F(ContainsPointerVisitorTest, class_with_no_pointers) {
     // ARRANGE
     addPointerTestClassesToDictionary(&dataTypeInator);
-    const DataType * type = dataTypeInator.resolve("ClassWithNoPointers");
+    std::shared_ptr<const DataType> type = dataTypeInator.resolve("ClassWithNoPointers");
 
     // ACT
     bool result = DataTypeAlgorithm::containsPointer(type);
@@ -129,14 +129,14 @@ TEST_F(ContainsPointerVisitorTest, class_with_no_pointers) {
     // ASSERT
     ASSERT_EQ(false, result);
 
-    delete type;
+
 }
 
 TEST_F(ContainsPointerVisitorTest, class_with_pointers) {
     // ARRANGE
     addPointerTestClassesToDictionary(&dataTypeInator);
 
-    const DataType * type = dataTypeInator.resolve("ClassWithPointer");
+    std::shared_ptr<const DataType> type = dataTypeInator.resolve("ClassWithPointer");
 
     // ACT
     bool result = DataTypeAlgorithm::containsPointer(type);
@@ -144,14 +144,14 @@ TEST_F(ContainsPointerVisitorTest, class_with_pointers) {
     // ASSERT
     ASSERT_EQ(true, result);
 
-    delete type;
+
 }
 
 TEST_F(ContainsPointerVisitorTest, class_with_nested_pointers) {
     // ARRANGE
     addPointerTestClassesToDictionary(&dataTypeInator);
 
-    const DataType * type = dataTypeInator.resolve("ClassWithNestedClasses");
+    std::shared_ptr<const DataType> type = dataTypeInator.resolve("ClassWithNestedClasses");
 
     // ACT
     bool result = DataTypeAlgorithm::containsPointer(type);
@@ -159,7 +159,7 @@ TEST_F(ContainsPointerVisitorTest, class_with_nested_pointers) {
     // ASSERT
     ASSERT_EQ(true, result);
 
-    delete type;
+
 }
 
 
@@ -168,7 +168,7 @@ TEST_F(ContainsPointerVisitorTest, enum) {
     EnumDictionary enumDictionary;
     addDayOfWeekEnumToTypeDictionary(&dataTypeInator, &enumDictionary);
 
-    const DataType * type = dataTypeInator.resolve("DayOfWeek");
+    std::shared_ptr<const DataType> type = dataTypeInator.resolve("DayOfWeek");
 
     // ACT
     bool result = DataTypeAlgorithm::containsPointer(type);
@@ -176,5 +176,5 @@ TEST_F(ContainsPointerVisitorTest, enum) {
     // ASSERT
     ASSERT_EQ(false, result);
 
-    delete type;
+
 }

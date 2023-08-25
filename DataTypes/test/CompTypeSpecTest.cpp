@@ -53,7 +53,7 @@ TEST_F(CompositeDataTypeTest, toString_1 ) {
 
     EXPECT_EQ(true, addClassOneToTypeDictionary( dataTypeInator ));
 
-    const DataType* dataType = dataTypeInator->resolve("ClassOne");
+    std::shared_ptr<const DataType> dataType = dataTypeInator->resolve("ClassOne");
 
     ASSERT_TRUE(dataType != NULL) ;
 
@@ -70,7 +70,7 @@ TEST_F(CompositeDataTypeTest, toString_2 ) {
     EXPECT_EQ(true, addClassOneToTypeDictionary( dataTypeInator ));
     EXPECT_EQ(true, addClassTwoToTypeDictionary( dataTypeInator ));
 
-    const DataType* dataType = dataTypeInator->resolve("ClassTwo");
+    std::shared_ptr<const DataType> dataType = dataTypeInator->resolve("ClassTwo");
     ASSERT_TRUE(dataType != NULL) ;
 
     // Print the duplicate CompositeDataType.
@@ -85,7 +85,7 @@ TEST_F(CompositeDataTypeTest, toString_3 ) {
 
     EXPECT_EQ(true, addClassThreeToTypeDictionary( dataTypeInator ));
 
-    const DataType* dataType = dataTypeInator->resolve("ClassThree");
+    std::shared_ptr<const DataType> dataType = dataTypeInator->resolve("ClassThree");
     ASSERT_TRUE(dataType != NULL) ;
 
     // Print the duplicate CompositeDataType.
@@ -94,42 +94,6 @@ TEST_F(CompositeDataTypeTest, toString_3 ) {
 
     // Check the results.
     EXPECT_EQ("composite {\ndouble pos[2];\ndouble vel[2];\n}\n", ss.str());
-}
-
-TEST_F(CompositeDataTypeTest, copy_constructor ) {
-
-    EXPECT_EQ(true, addClassOneToTypeDictionary( dataTypeInator ));
-
-    const DataType* dataType = dataTypeInator->resolve("ClassOne");
-    ASSERT_TRUE(dataType != NULL) ;
-
-    const DataType * copy = new CompositeDataType(*(const CompositeDataType*)dataType);
-
-    // Print the duplicate CompositeDataType.
-    std::stringstream ss;
-    ss << copy->toString();
-
-    // Check the results.
-    EXPECT_EQ("composite {\nint a;\ndouble b;\n}\n", ss.str());
-
-    delete copy;
-}
-
-TEST_F(CompositeDataTypeTest, operator_equal ) {
-
-    EXPECT_EQ(true, addClassOneToTypeDictionary( dataTypeInator ));
-
-    const DataType* dataType = dataTypeInator->resolve("ClassOne");
-    ASSERT_TRUE(dataType != NULL) ;
-
-    CompositeDataType copy = *(const CompositeDataType*)dataType;
-
-    // Print the duplicate CompositeDataType.
-    std::stringstream ss;
-    ss << copy.toString();
-
-    // Check the results.
-    EXPECT_EQ("composite {\nint a;\ndouble b;\n}\n", ss.str());
 }
 
 
@@ -149,34 +113,3 @@ TEST_F(CompositeDataTypeTest, getSize ) {
     EXPECT_EQ( sizeof(ClassOne), compTypeSpec->getSize());
 
 }
-
-TEST_F(CompositeDataTypeTest, assignment_operator ) {
-    // ARRANGE
-    CompositeDataType  type_a("ClassOne",
-                                    sizeof(ClassOne),
-                                    &construct<ClassOne>,
-                                    &destruct<ClassOne>);
-
-    type_a.addRegularMember( "a", offsetof(ClassOne, a), "int");
-    type_a.addRegularMember( "b", offsetof(ClassOne, b), "double");
-
-    CompositeDataType  type_b("SomeOtherClass",
-                                    4,
-                                    NULL,
-                                    NULL);
-
-    type_b.addRegularMember( "somethingidk", 0, "int");
-
-    type_a.validate(dataTypeInator);
-    type_b.validate(dataTypeInator);
-
-
-    // ACT
-    type_a = type_b;
-
-    // ASSERT
-    EXPECT_EQ( type_b.getSize(), type_a.getSize());
-    EXPECT_EQ( std::string("SomeOtherClass"), type_a.getTypeSpecName());
-    ASSERT_EQ( type_b.getNormalMemberCount(), type_a.getNormalMemberCount());
-}
-
